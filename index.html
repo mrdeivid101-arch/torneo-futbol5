@@ -1199,18 +1199,6 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
   gap: 12px;
 }
 
-.mvp-star {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 2px solid #6366f1;
-  background: rgba(99, 102, 241, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-}
-
 .mvp-avatar img {
   width: 60px;
   height: 60px;
@@ -1292,6 +1280,8 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
   let previousChampion = null;
   let lastGoleadoresData = [];
   let lastMvpRows = [];
+  let lastEncuestasVotos = [];
+  let encuestaVotanteId = null;
 
   // ================================================================
   // MVP / JUGADOR DE LA JORNADA
@@ -1770,48 +1760,118 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
   }
 
   // --- ENCUESTAS DE PREDICCIÓN POR JORNADA ---
+  function getEncuestaVotanteId() {
+    const key = 'torneo_f5_encuesta_votante_id';
+    let id = localStorage.getItem(key);
+    if (!id) {
+      if (window.crypto && crypto.randomUUID) id = crypto.randomUUID();
+      else id = 'v-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      localStorage.setItem(key, id);
+    }
+    encuestaVotanteId = id;
+    return id;
+  }
+
   function getPollVotes(matchId) {
-    const pollKey = `poll_match_${matchId}`;
+    const rows = (lastEncuestasVotos || []).filter(v => String(v.id_partido) === String(matchId));
+    const votes = { local: 0, empate: 0, visitante: 0 };
+    rows.forEach(v => {
+      if (Object.prototype.hasOwnProperty.call(votes, v.opcion)) votes[v.opcion]++;
+    });
+    return votes;
+  }
+
+  function hasVoted(matchId) {
+    const voterId = getEncuestaVotanteId();
+    return (lastEncuestasVotos || []).some(v =>
+      String(v.id_partido) === String(matchId) && String(v.votante_id) === String(voterId)
+    );
+  }
+
+  async function refreshEncuestas() {
     try {
-      return JSON.parse(localStorage.getItem(`${pollKey}_counts`)) || { local: 12, empate: 5, visitante: 8 };
+      lastEncuestasVotos = await fetchTable('Encuestas_Votos');
     } catch (e) {
-      return { local: 12, empate: 5, visitante: 8 };
+      console.warn('Encuestas_Votos todavía no está disponible:', e);
+      lastEncuestasVotos = [];
     }
   }
 
-  function submitVote(matchId, option) {
-    const pollKey = `poll_match_${matchId}`;
-    const votes = getPollVotes(matchId);
+  async function submitVote(matchId, option) {
     if (!['local', 'empate', 'visitante'].includes(option)) return;
-    votes[option] = Number(votes[option] || 0) + 1;
-    localStorage.setItem(`${pollKey}_counts`, JSON.stringify(votes));
-    localStorage.setItem(pollKey, option);
-    renderNextMatch();
+    if (hasVoted(matchId)) return;
+
+    const voterId = getEncuestaVotanteId();
+    const buttons = document.querySelectorAll(`[data-vote-match="${CSS.escape(String(matchId))}"]`);
+    buttons.forEach(btn => { btn.disabled = true; });
+
+    try {
+      const res = await fetch(`${SUPA_URL}/rest/v1/rpc/registrar_encuesta_voto`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPA_KEY,
+          Authorization: `Bearer ${SUPA_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          p_id_partido: String(matchId),
+          p_opcion: option,
+          p_votante_id: voterId
+        })
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        console.error('No se pudo registrar el voto:', data);
+        alert('No se pudo registrar tu voto. Intenta de nuevo.');
+        return;
+      }
+
+      if (!data || data.ok !== true) {
+        const messages = {
+          ya_voto: 'Ya registraste tu voto para este partido.',
+          demasiados_votos: 'Has realizado demasiados votos en poco tiempo. Intenta nuevamente más tarde.',
+          encuesta_cerrada: 'Esta encuesta ya está cerrada porque el partido comenzó o terminó.',
+          opcion_invalida: 'La opción seleccionada no es válida.'
+        };
+        if (data?.reason !== 'ya_voto') {
+          alert(messages[data?.reason] || 'No se pudo registrar tu voto.');
+        }
+      }
+
+      await refreshEncuestas();
+      await renderNextMatch();
+    } catch (err) {
+      console.error('Error de red al votar:', err);
+      alert('No se pudo conectar con la encuesta. Intenta de nuevo.');
+    } finally {
+      buttons.forEach(btn => { btn.disabled = false; });
+    }
   }
   window.submitVote = submitVote;
 
-  function renderPoll(matchId, localName, visitanteName) {
-    const pollKey = `poll_match_${matchId}`;
-    const savedVote = localStorage.getItem(pollKey);
+  async function renderPoll(matchId, localName, visitanteName) {
+    const voted = hasVoted(matchId);
     const votes = getPollVotes(matchId);
     const totalVotes = votes.local + votes.empate + votes.visitante;
-    const calcPct = val => totalVotes > 0 ? Math.round((val / totalVotes) * 100) : 33;
+    const calcPct = val => totalVotes > 0 ? Math.round((val / totalVotes) * 100) : 0;
 
-    if (savedVote) {
+    if (voted) {
       return `
         <div class="poll-container">
-          <p class="poll-title">📊 Pronóstico de la afición</p>
+          <p class="poll-title">📊 Pronóstico de la afición · ${totalVotes} voto${totalVotes === 1 ? '' : 's'}</p>
           <div class="poll-results">
             <div class="poll-bar-wrapper">
-              <span class="poll-label">${escapeHtml(localName)} (${calcPct(votes.local)}%)</span>
+              <span class="poll-label">${escapeHtml(localName)} (${calcPct(votes.local)}%) · ${votes.local}</span>
               <div class="poll-bar"><div class="poll-fill" style="width: ${calcPct(votes.local)}%"></div></div>
             </div>
             <div class="poll-bar-wrapper">
-              <span class="poll-label">Empate (${calcPct(votes.empate)}%)</span>
+              <span class="poll-label">Empate (${calcPct(votes.empate)}%) · ${votes.empate}</span>
               <div class="poll-bar"><div class="poll-fill" style="width: ${calcPct(votes.empate)}%"></div></div>
             </div>
             <div class="poll-bar-wrapper">
-              <span class="poll-label">${escapeHtml(visitanteName)} (${calcPct(votes.visitante)}%)</span>
+              <span class="poll-label">${escapeHtml(visitanteName)} (${calcPct(votes.visitante)}%) · ${votes.visitante}</span>
               <div class="poll-bar"><div class="poll-fill" style="width: ${calcPct(votes.visitante)}%"></div></div>
             </div>
           </div>
@@ -1820,7 +1880,7 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
 
     return `
       <div class="poll-container">
-        <p class="poll-title">🔮 ¿Quién ganará este encuentro?</p>
+        <p class="poll-title">🔮 ¿Quién ganará este encuentro? · ${totalVotes} voto${totalVotes === 1 ? '' : 's'}</p>
         <div class="poll-buttons">
           <button class="poll-btn" type="button" data-vote-match="${escapeHtml(matchId)}" data-vote-option="local">${escapeHtml(localName)}</button>
           <button class="poll-btn" type="button" data-vote-match="${escapeHtml(matchId)}" data-vote-option="empate">Empate</button>
@@ -1829,7 +1889,7 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
       </div>`;
   }
 
-  function renderJornadaPolls(next, unplayed) {
+  async function renderJornadaPolls(next, unplayed) {
     const jornadaMatches = unplayed
       .filter(m => String(m.jornada) === String(next.jornada))
       .sort((a, b) => {
@@ -1840,6 +1900,15 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
 
     if (!jornadaMatches.length) return '';
 
+    const items = await Promise.all(jornadaMatches.map(async (m, index) => `
+      <div class="poll-match-item ${index === 0 ? 'open' : ''}" data-poll-item="${escapeHtml(m.id_partido)}">
+        <button class="poll-match-toggle" type="button" data-poll-toggle="${escapeHtml(m.id_partido)}" aria-expanded="${index === 0 ? 'true' : 'false'}">
+          <span class="poll-match-teams">${escapeHtml(m.equipo_local)} <strong>vs</strong> ${escapeHtml(m.equipo_visitante)}</span>
+          <span class="poll-match-arrow">${index === 0 ? '▲' : '▼'}</span>
+        </button>
+        <div class="poll-match-content">${await renderPoll(m.id_partido, m.equipo_local, m.equipo_visitante)}</div>
+      </div>`));
+
     return `
       <div class="jornada-polls" id="jornadaPolls">
         <div class="jornada-polls-head">
@@ -1847,14 +1916,7 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
           <button class="jornada-polls-toggle" type="button" id="toggleJornadaPolls" aria-expanded="true">Minimizar</button>
         </div>
         <div class="jornada-polls-list" id="jornadaPollsList">
-          ${jornadaMatches.map((m, index) => `
-            <div class="poll-match-item ${index === 0 ? 'open' : ''}" data-poll-item="${escapeHtml(m.id_partido)}">
-              <button class="poll-match-toggle" type="button" data-poll-toggle="${escapeHtml(m.id_partido)}" aria-expanded="${index === 0 ? 'true' : 'false'}">
-                <span class="poll-match-teams">${escapeHtml(m.equipo_local)} <strong>vs</strong> ${escapeHtml(m.equipo_visitante)}</span>
-                <span class="poll-match-arrow">${index === 0 ? '▲' : '▼'}</span>
-              </button>
-              <div class="poll-match-content">${renderPoll(m.id_partido, m.equipo_local, m.equipo_visitante)}</div>
-            </div>`).join('')}
+          ${items.join('')}
         </div>
       </div>`;
   }
@@ -1915,7 +1977,7 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
   }
 
   // --- TARJETA PRÓXIMO PARTIDO + ENCUESTAS DE LA MISMA JORNADA ---
-  function renderNextMatch() {
+  async function renderNextMatch() {
     const nextMatchEl = document.getElementById('nextMatch');
     if (!nextMatchEl) return;
 
@@ -1954,7 +2016,7 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
       <p class="next-match-time">${escapeHtml(info.displayHora)}</p>
       <p class="next-match-countdown" id="nextMatchCountdown">${info.date ? formatCountdown(info.date.getTime() - Date.now()) : 'Cuenta regresiva disponible cuando haya fecha y hora'}</p>
       <p class="next-match-meta">${dateLabel ? escapeHtml(dateLabel) + ' · ' : ''}Jornada ${escapeHtml(next.jornada)} · ${next.vuelta === 'Primera' ? '1ª vuelta' : '2ª vuelta'}</p>
-      ${renderJornadaPolls(next, unplayed)}`;
+      ${await renderJornadaPolls(next, unplayed)}`;
 
     bindJornadaPolls();
     startNextMatchCountdown(next);
@@ -2273,6 +2335,8 @@ function filterCalendarioByTeam(teamName) {
         console.warn('MVP_Jornadas todavía no está disponible:', e);
         lastMvpRows = [];
       }
+
+      await refreshEncuestas();
       
       // Aquí forzamos la propiedad 'jugado' leyendo directamente si hay goles reportados
       lastPartidos = [...cal].map(m => ({
@@ -2294,7 +2358,7 @@ function filterCalendarioByTeam(teamName) {
       renderGoleadores(gol);
       renderLlaves(pos, playoffs);
       renderCalendario(lastPartidos);
-      renderNextMatch();
+      await renderNextMatch();
       renderMvpPorJornada();
       
       syncDot.className = 'dot';
