@@ -3,313 +3,1653 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Cargar jornada · Torneo de Fútbol 5</title>
+
 <meta name="robots" content="noindex, nofollow">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
+  defer>
+</script>
+
 <style>
+
+:root {
+  --pitch-dark: #0B2545;
+  --pitch: #1D5BA6;
+  --grass: #5EC8FA;
+  --chalk: #F4F7FB;
+  --card: #FFFFFF;
+  --ink: #0F2036;
+  --ink-soft: #55677E;
+  --gold: #D9A441;
+  --line: rgba(15, 32, 54, 0.10);
+
+  --font-display: 'Teko', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+
   :root {
-    --pitch-dark: #0B2545;
-    --pitch: #1D5BA6;
-    --grass: #5EC8FA;
-    --chalk: #F4F7FB;
-    --card: #FFFFFF;
-    --ink: #0F2036;
-    --ink-soft: #55677E;
-    --gold: #D9A441;
-    --line: rgba(15, 32, 54, 0.10);
-    --font-display: 'Teko', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --chalk:#0A1626;
+    --card:#10203A;
+    --ink:#EDF2FA;
+    --ink-soft:#9FB0C8;
+    --line:rgba(237,242,250,0.10);
   }
-  @media (prefers-color-scheme: dark) {
-    :root { --chalk:#0A1626; --card:#10203A; --ink:#EDF2FA; --ink-soft:#9FB0C8; --line:rgba(237,242,250,0.10); }
-  }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--chalk); color:var(--ink); font-family:var(--font-body); -webkit-font-smoothing:antialiased; }
-  header { background:var(--pitch-dark); color:var(--chalk); padding:1.8rem 1.25rem; text-align:center; }
-  header h1 { font-family:var(--font-display); font-weight:600; font-size:2rem; margin:0 0 0.2rem; }
-  header p { margin:0; font-size:0.85rem; color:rgba(244,247,251,0.65); }
-  main { max-width:640px; margin:0 auto; padding:1.25rem; }
-  .card { background:var(--card); border-radius:12px; padding:1.25rem; margin-bottom:1rem; border:1px solid var(--line); }
-  .card h2 { font-family:var(--font-display); font-size:1.3rem; font-weight:600; margin:0 0 0.7rem; }
-  input[type="password"], input[type="file"] {
-    width:100%; box-sizing:border-box; padding:0.6rem 0.8rem; border-radius:8px; border:1px solid var(--line);
-    background:var(--chalk); color:var(--ink); font-family:var(--font-body); font-size:0.95rem;
-  }
-  button {
-    font-family:var(--font-body); font-weight:600; font-size:0.92rem; border-radius:9px; cursor:pointer;
-    padding:0.7rem 1.1rem; border:none;
-  }
-  .btn-primary { background:var(--pitch); color:#fff; }
-  .btn-primary:disabled { opacity:0.5; cursor:default; }
-  .btn-secondary { background:transparent; border:1px solid var(--pitch); color:var(--pitch); }
-  .row { display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.9rem; }
-  .stat { flex:1; min-width:120px; background:var(--chalk); border-radius:10px; padding:0.7rem 0.9rem; }
-  .stat .n { font-family:var(--font-display); font-size:1.6rem; font-weight:600; }
-  .stat .l { font-size:0.72rem; color:var(--ink-soft); }
-  ul.confirmed { margin:0.7rem 0 0; padding:0 0 0 1.1rem; font-size:0.85rem; }
-  ul.confirmed li { margin-bottom:0.3rem; }
-  .msg { font-size:0.88rem; padding:0.7rem 0.9rem; border-radius:8px; margin-top:0.8rem; }
-  .msg.ok { background:rgba(46,158,91,0.12); color:#2E9E5B; }
-  .msg.err { background:rgba(192,57,43,0.12); color:#C0392B; }
-  .hidden { display:none !important; }
-  label { display:block; font-size:0.82rem; font-weight:600; color:var(--ink-soft); margin-bottom:0.4rem; }
-  .lock { text-align:center; padding:3rem 1.25rem; }
+
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin:0;
+  background:var(--chalk);
+  color:var(--ink);
+  font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+}
+
+header {
+  background:var(--pitch-dark);
+  color:var(--chalk);
+  padding:1.8rem 1.25rem;
+  text-align:center;
+}
+
+header h1 {
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:2rem;
+  margin:0 0 0.2rem;
+}
+
+header p {
+  margin:0;
+  font-size:0.85rem;
+  color:rgba(244,247,251,0.65);
+}
+
+main {
+  max-width:640px;
+  margin:0 auto;
+  padding:1.25rem;
+}
+
+.card {
+  background:var(--card);
+  border-radius:12px;
+  padding:1.25rem;
+  margin-bottom:1rem;
+  border:1px solid var(--line);
+}
+
+.card h2 {
+  font-family:var(--font-display);
+  font-size:1.3rem;
+  font-weight:600;
+  margin:0 0 0.7rem;
+}
+
+input[type="password"],
+input[type="file"] {
+  width:100%;
+  box-sizing:border-box;
+  padding:0.6rem 0.8rem;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:var(--chalk);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:0.95rem;
+}
+
+button {
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:0.92rem;
+  border-radius:9px;
+  cursor:pointer;
+  padding:0.7rem 1.1rem;
+  border:none;
+}
+
+.btn-primary {
+  background:var(--pitch);
+  color:#fff;
+}
+
+.btn-primary:disabled {
+  opacity:0.5;
+  cursor:default;
+}
+
+.btn-secondary {
+  background:transparent;
+  border:1px solid var(--pitch);
+  color:var(--pitch);
+}
+
+.row {
+  display:flex;
+  gap:0.6rem;
+  flex-wrap:wrap;
+  margin-top:0.9rem;
+}
+
+.stat {
+  flex:1;
+  min-width:120px;
+  background:var(--chalk);
+  border-radius:10px;
+  padding:0.7rem 0.9rem;
+}
+
+.stat .n {
+  font-family:var(--font-display);
+  font-size:1.6rem;
+  font-weight:600;
+}
+
+.stat .l {
+  font-size:0.72rem;
+  color:var(--ink-soft);
+}
+
+ul.confirmed {
+  margin:0.7rem 0 0;
+  padding:0 0 0 1.1rem;
+  font-size:0.85rem;
+}
+
+ul.confirmed li {
+  margin-bottom:0.3rem;
+}
+
+.msg {
+  font-size:0.88rem;
+  padding:0.7rem 0.9rem;
+  border-radius:8px;
+  margin-top:0.8rem;
+  word-break:break-word;
+}
+
+.msg.ok {
+  background:rgba(46,158,91,0.12);
+  color:#2E9E5B;
+}
+
+.msg.err {
+  background:rgba(192,57,43,0.12);
+  color:#C0392B;
+}
+
+.msg.info {
+  background:rgba(29,91,166,0.10);
+  color:var(--pitch);
+}
+
+.hidden {
+  display:none !important;
+}
+
+label {
+  display:block;
+  font-size:0.82rem;
+  font-weight:600;
+  color:var(--ink-soft);
+  margin-bottom:0.4rem;
+}
+
+.lock {
+  text-align:center;
+  padding:3rem 1.25rem;
+}
+
+.small-note {
+  font-size:0.76rem;
+  color:var(--ink-soft);
+  margin-top:0.6rem;
+  line-height:1.5;
+}
+
+.loading {
+  opacity:0.7;
+}
+
 </style>
 </head>
+
 <body>
 
 <header>
+
   <h1>Cargar jornada</h1>
-  <p>Panel privado · Torneo de Fútbol 5</p>
+
+  <p>
+    Panel privado · Torneo de Fútbol 5
+  </p>
+
 </header>
+
 
 <main>
 
+  <!-- =====================================================
+       BLOQUE DE ACCESO
+       ===================================================== -->
+
   <div class="card lock" id="lockCard">
-    <label for="pinInput">PIN de acceso</label>
-    <input type="password" id="pinInput" inputmode="numeric" placeholder="••••">
-    <div class="row"><button class="btn-primary" id="pinBtn" style="width:100%">Entrar</button></div>
-    <p class="msg err hidden" id="pinError">PIN incorrecto.</p>
+
+    <label for="pinInput">
+      PIN de acceso
+    </label>
+
+    <input
+      type="password"
+      id="pinInput"
+      inputmode="numeric"
+      placeholder="••••"
+    >
+
+    <div class="row">
+
+      <button
+        class="btn-primary"
+        id="pinBtn"
+        style="width:100%"
+      >
+        Entrar
+      </button>
+
+    </div>
+
+    <p
+      class="msg err hidden"
+      id="pinError"
+    >
+      PIN incorrecto.
+    </p>
+
   </div>
+
+
+  <!-- =====================================================
+       APLICACIÓN
+       ===================================================== -->
 
   <div id="appContent" class="hidden">
 
+
+    <!-- ===================================================
+         1. SUBIR EXCEL
+         =================================================== -->
+
     <div class="card">
-      <h2>1. Sube el Excel</h2>
-      <label for="fileInput">Control estructural de estadísticas (.xlsx)</label>
-      <input type="file" id="fileInput" accept=".xlsx">
-      <p id="fileStatus" class="msg hidden"></p>
+
+      <h2>
+        1. Sube el Excel
+      </h2>
+
+      <label for="fileInput">
+        Control estructural de estadísticas (.xlsx)
+      </label>
+
+      <input
+        type="file"
+        id="fileInput"
+        accept=".xlsx"
+      >
+
+      <p
+        id="fileStatus"
+        class="msg hidden"
+      ></p>
+
     </div>
 
-    <div class="card hidden" id="previewCard">
-      <h2>2. Revisa antes de subir</h2>
+
+    <!-- ===================================================
+         2. VISTA PREVIA
+         =================================================== -->
+
+    <div
+      class="card hidden"
+      id="previewCard"
+    >
+
+      <h2>
+        2. Revisa antes de subir
+      </h2>
+
+
       <div class="row">
-        <div class="stat"><div class="n" id="statPartidos">0</div><div class="l">Partidos leídos</div></div>
-        <div class="stat"><div class="n" id="statNuevos">0</div><div class="l">Partidos nuevos</div></div>
-        <div class="stat"><div class="n" id="statConfirmados">0</div><div class="l">Recién confirmados</div></div>
-        <div class="stat"><div class="n" id="statGoles">0</div><div class="l">Registros de goles</div></div>
+
+        <div class="stat">
+
+          <div
+            class="n"
+            id="statPartidos"
+          >
+            0
+          </div>
+
+          <div class="l">
+            Partidos leídos
+          </div>
+
+        </div>
+
+
+        <div class="stat">
+
+          <div
+            class="n"
+            id="statNuevos"
+          >
+            0
+          </div>
+
+          <div class="l">
+            Partidos nuevos
+          </div>
+
+        </div>
+
+
+        <div class="stat">
+
+          <div
+            class="n"
+            id="statConfirmados"
+          >
+            0
+          </div>
+
+          <div class="l">
+            Recién confirmados
+          </div>
+
+        </div>
+
+
+        <div class="stat">
+
+          <div
+            class="n"
+            id="statGoles"
+          >
+            0
+          </div>
+
+          <div class="l">
+            Registros de goles
+          </div>
+
+        </div>
+
       </div>
+
+
       <div id="confirmedList"></div>
+
+
       <div class="row">
-        <button class="btn-primary" id="uploadBtn" style="flex:1">Confirmar y subir a Supabase</button>
+
+        <button
+          class="btn-primary"
+          id="uploadBtn"
+          style="flex:1"
+        >
+          Confirmar y subir a Supabase
+        </button>
+
       </div>
-      <p id="uploadStatus" class="msg hidden"></p>
+
+
+      <p
+        id="uploadStatus"
+        class="msg hidden"
+      ></p>
+
+
+      <p class="small-note">
+        El archivo actualizará los partidos y los registros
+        individuales de GOLES POR ACTA en Supabase.
+      </p>
+
     </div>
+
 
   </div>
 
 </main>
 
-<script>
-(function () {
-  const SUPA_URL = "https://vhipsbojmocoiydcrlyw.supabase.co";
-  const SUPA_KEY = "sb_publishable_XSuu3pQmiZbSYTBbVCmhjg_5-4V8FF9";
 
-  // Cambia este PIN por el que quieras usar.
+<script>
+
+(function () {
+
+  'use strict';
+
+
+  /* ======================================================
+     CONFIGURACIÓN SUPABASE
+     ====================================================== */
+
+  const SUPA_URL =
+    "https://vhipsbojmocoiydcrlyw.supabase.co";
+
+  const SUPA_KEY =
+    "sb_publishable_XSuu3pQmiZbSYTBbVCmhjg_5-4V8FF9";
+
+
+  /* ======================================================
+     PIN
+     ====================================================== */
+
   const ADMIN_PIN = "guinope5";
 
-  const lockCard = document.getElementById('lockCard');
-  const appContent = document.getElementById('appContent');
-  const pinInput = document.getElementById('pinInput');
-  const pinBtn = document.getElementById('pinBtn');
-  const pinError = document.getElementById('pinError');
+
+  /* ======================================================
+     ELEMENTOS
+     ====================================================== */
+
+  const lockCard =
+    document.getElementById('lockCard');
+
+  const appContent =
+    document.getElementById('appContent');
+
+  const pinInput =
+    document.getElementById('pinInput');
+
+  const pinBtn =
+    document.getElementById('pinBtn');
+
+  const pinError =
+    document.getElementById('pinError');
+
+
+  /* ======================================================
+     ACCESO
+     ====================================================== */
 
   function unlock() {
+
     lockCard.classList.add('hidden');
+
     appContent.classList.remove('hidden');
-    sessionStorage.setItem('torneoAdminUnlocked', '1');
+
+    sessionStorage.setItem(
+      'torneoAdminUnlocked',
+      '1'
+    );
+
   }
-  if (sessionStorage.getItem('torneoAdminUnlocked') === '1') unlock();
 
-  pinBtn.addEventListener('click', () => {
-    if (pinInput.value === ADMIN_PIN) { unlock(); }
-    else { pinError.classList.remove('hidden'); }
-  });
-  pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') pinBtn.click(); });
 
-  // ---------- Lectura del Excel ----------
+  if (
+    sessionStorage.getItem(
+      'torneoAdminUnlocked'
+    ) === '1'
+  ) {
+
+    unlock();
+
+  }
+
+
+  pinBtn.addEventListener(
+    'click',
+    () => {
+
+      if (
+        pinInput.value === ADMIN_PIN
+      ) {
+
+        unlock();
+
+      } else {
+
+        pinError.classList.remove(
+          'hidden'
+        );
+
+      }
+
+    }
+  );
+
+
+  pinInput.addEventListener(
+    'keydown',
+    e => {
+
+      if (e.key === 'Enter') {
+
+        pinBtn.click();
+
+      }
+
+    }
+  );
+
+
+  /* ======================================================
+     LECTURA DEL EXCEL
+     ====================================================== */
 
   function sheetToObjects(ws) {
+
     if (!ws) return [];
-    const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+
+    const aoa =
+      XLSX.utils.sheet_to_json(
+        ws,
+        {
+          header: 1,
+          raw: true,
+          defval: null
+        }
+      );
+
+
     let headerIdx = -1;
-    for (let i = 0; i < aoa.length; i++) {
-      if (aoa[i] && String(aoa[i][0] || '').trim() === 'ID Partido') { headerIdx = i; break; }
+
+
+    for (
+      let i = 0;
+      i < aoa.length;
+      i++
+    ) {
+
+      if (
+        aoa[i] &&
+        String(
+          aoa[i][0] || ''
+        ).trim() === 'ID Partido'
+      ) {
+
+        headerIdx = i;
+
+        break;
+
+      }
+
     }
-    if (headerIdx === -1) return [];
-    const headers = aoa[headerIdx].map(h => String(h || '').trim());
+
+
+    if (headerIdx === -1) {
+
+      return [];
+
+    }
+
+
+    const headers =
+      aoa[headerIdx].map(
+        h => String(h || '').trim()
+      );
+
+
     const rows = [];
-    for (let i = headerIdx + 1; i < aoa.length; i++) {
+
+
+    for (
+      let i = headerIdx + 1;
+      i < aoa.length;
+      i++
+    ) {
+
       const row = aoa[i];
-      if (!row || !row[0]) continue;
+
+
+      if (
+        !row ||
+        row[0] == null ||
+        String(row[0]).trim() === ''
+      ) {
+
+        continue;
+
+      }
+
+
       const obj = {};
-      headers.forEach((h, idx) => { obj[h] = row[idx] === undefined ? null : row[idx]; });
+
+
+      headers.forEach(
+        (h, idx) => {
+
+          obj[h] =
+            row[idx] === undefined
+              ? null
+              : row[idx];
+
+        }
+      );
+
+
       rows.push(obj);
+
     }
+
+
     return rows;
+
   }
+
+
+  /* ======================================================
+     FECHAS EXCEL → ISO
+     ====================================================== */
 
   function excelDateToISO(d) {
+
     if (!d) return null;
+
+
     if (d instanceof Date) {
-      const y = d.getUTCFullYear(), m = String(d.getUTCMonth() + 1).padStart(2, '0'), day = String(d.getUTCDate()).padStart(2, '0');
+
+      const y =
+        d.getUTCFullYear();
+
+      const m =
+        String(
+          d.getUTCMonth() + 1
+        ).padStart(2, '0');
+
+      const day =
+        String(
+          d.getUTCDate()
+        ).padStart(2, '0');
+
+
       return `${y}-${m}-${day}`;
+
     }
-    return null;
-  }
 
-  function buildPartidosPayload(actas, existingIds) {
-    return actas.map(r => {
-      const confirmed = r['Acta confirmada'] === 'Sí' && r['Goles Local'] != null && r['Goles Visitante'] != null;
-      const row = {
-        id_partido: String(r['ID Partido']).trim(),
-        vuelta: r['Vuelta'],
-        jornada: Number(r['Jornada']),
-        fecha: excelDateToISO(r['Fecha']),
-        equipo_local: r['Equipo Local'],
-        equipo_visitante: r['Equipo Visitante'],
-        jugado: confirmed,
-        goles_local: confirmed ? Number(r['Goles Local']) : null,
-        goles_visitante: confirmed ? Number(r['Goles Visitante']) : null
-      };
-      if (!existingIds.has(row.id_partido)) {
-        const num = parseInt(row.id_partido.replace(/\D/g, ''), 10);
-        if (!isNaN(num)) row.orden = num;
+
+    if (
+      typeof d === 'number'
+    ) {
+
+      const date =
+        XLSX.SSF.parse_date_code(d);
+
+
+      if (!date) return null;
+
+
+      const y =
+        String(date.y);
+
+      const m =
+        String(date.m)
+          .padStart(2, '0');
+
+      const day =
+        String(date.d)
+          .padStart(2, '0');
+
+
+      return `${y}-${m}-${day}`;
+
+    }
+
+
+    if (
+      typeof d === 'string'
+    ) {
+
+      const value =
+        d.trim();
+
+
+      if (!value) return null;
+
+
+      // DD/MM/YYYY
+      const match =
+        value.match(
+          /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+        );
+
+
+      if (match) {
+
+        const day =
+          match[1].padStart(2, '0');
+
+        const month =
+          match[2].padStart(2, '0');
+
+        const year =
+          match[3];
+
+
+        return `${year}-${month}-${day}`;
+
       }
-      return row;
+
+
+      // YYYY-MM-DD
+      if (
+        /^\d{4}-\d{2}-\d{2}$/.test(value)
+      ) {
+
+        return value;
+
+      }
+
+    }
+
+
+    return null;
+
+  }
+
+
+  /* ======================================================
+     NORMALIZACIÓN DE HORA
+     ====================================================== */
+
+  function normalizeHora(value) {
+
+    if (value == null) return null;
+
+
+    if (
+      typeof value === 'number'
+    ) {
+
+      const totalMinutes =
+        Math.round(value * 24 * 60);
+
+      const hours =
+        Math.floor(
+          totalMinutes / 60
+        ) % 24;
+
+      const minutes =
+        totalMinutes % 60;
+
+
+      return `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`;
+
+    }
+
+
+    const text =
+      String(value).trim();
+
+
+    if (!text) return null;
+
+
+    return text;
+
+  }
+
+
+  /* ======================================================
+     CONVERTIR ACTAS → PARTIDOS
+     ====================================================== */
+
+  function buildPartidosPayload(
+    actas,
+    existingMap
+  ) {
+
+    return actas.map(r => {
+
+      const idStr =
+        String(
+          r['ID Partido']
+        ).trim();
+
+
+      const confirmed =
+        r['Acta confirmada'] === 'Sí' &&
+        r['Goles Local'] != null &&
+        r['Goles Visitante'] != null;
+
+
+      const existing =
+        existingMap.get(idStr);
+
+
+      let ordenVal =
+        existing?.orden ?? null;
+
+
+      // Solo asignamos orden si el partido
+      // todavía no lo tiene.
+      if (
+        ordenVal == null
+      ) {
+
+        const num =
+          parseInt(
+            idStr.replace(/\D/g, ''),
+            10
+          );
+
+
+        if (!isNaN(num)) {
+
+          ordenVal = num;
+
+        }
+
+      }
+
+
+      return {
+
+        id_partido: idStr,
+
+        vuelta:
+          r['Vuelta'] ?? null,
+
+        jornada:
+          r['Jornada'] != null
+            ? Number(r['Jornada'])
+            : null,
+
+        fecha:
+          excelDateToISO(
+            r['Fecha']
+          ),
+
+        hora:
+          normalizeHora(
+            r['Hora']
+          ),
+
+        equipo_local:
+          r['Equipo Local'] ?? null,
+
+        equipo_visitante:
+          r['Equipo Visitante'] ?? null,
+
+        jugado:
+          confirmed,
+
+        goles_local:
+          confirmed
+            ? Number(r['Goles Local'])
+            : null,
+
+        goles_visitante:
+          confirmed
+            ? Number(r['Goles Visitante'])
+            : null,
+
+        orden:
+          ordenVal
+
+      };
+
     });
+
   }
 
-  function buildGolesPayload(golesRows, confirmedIds) {
+
+  /* ======================================================
+     CONVERTIR GOLES POR ACTA
+     ====================================================== */
+
+  function buildGolesPorActaPayload(
+    golesRows,
+    confirmedIds,
+    actasMap
+  ) {
+
     return golesRows
-      .filter(r => confirmedIds.has(String(r['ID Partido']).trim()))
-      .map(r => ({
-        id_partido: String(r['ID Partido']).trim(),
-        equipo: r['Equipo'],
-        jugador: r['Jugador'],
-        goles: r['Goles'] != null ? Number(r['Goles']) : 0,
-        ta: r['TA'] != null ? Number(r['TA']) : 0,
-        tr: r['TR'] != null ? Number(r['TR']) : 0,
-        vuelta: r['Vuelta'],
-        jornada: Number(r['Jornada'])
-      }));
+
+      .filter(r => {
+
+        const id =
+          String(
+            r['ID Partido']
+          ).trim();
+
+
+        return confirmedIds.has(id);
+
+      })
+
+      .map(r => {
+
+        const id =
+          String(
+            r['ID Partido']
+          ).trim();
+
+
+        const acta =
+          actasMap.get(id);
+
+
+        return {
+
+          id_partido: id,
+
+          equipo:
+            r['Equipo'] ?? null,
+
+          jugador:
+            r['Jugador'] ?? null,
+
+          goles:
+            r['Goles'] != null
+              ? Number(r['Goles'])
+              : 0,
+
+          ta:
+            r['TA'] != null
+              ? Number(r['TA'])
+              : 0,
+
+          tr:
+            r['TR'] != null
+              ? Number(r['TR'])
+              : 0,
+
+          vuelta:
+            r['Vuelta'] ??
+            acta?.vuelta ??
+            null,
+
+          jornada:
+            r['Jornada'] != null
+              ? Number(r['Jornada'])
+              : (
+                  acta?.jornada != null
+                    ? Number(acta.jornada)
+                    : null
+                ),
+
+          fecha:
+            acta?.fecha
+              ? excelDateToISO(acta.fecha)
+              : null
+
+        };
+
+      });
+
   }
 
-  // ---------- Supabase ----------
+
+  /* ======================================================
+     SUPABASE
+     ====================================================== */
 
   async function fetchExistingPartidos() {
-    const res = await fetch(`${SUPA_URL}/rest/v1/Partidos?select=id_partido,jugado`, {
-      headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` }
-    });
-    if (!res.ok) throw new Error('No se pudo leer los partidos existentes (código ' + res.status + ')');
-    return res.json();
-  }
 
-  async function upsertRows(table, rows, onConflict) {
-    if (!rows.length) return;
-    const chunkSize = 150;
-    for (let i = 0; i < rows.length; i += chunkSize) {
-      const chunk = rows.slice(i, i + chunkSize);
-      const res = await fetch(`${SUPA_URL}/rest/v1/${table}?on_conflict=${onConflict}`, {
-        method: 'POST',
-        headers: {
-          apikey: SUPA_KEY,
-          Authorization: `Bearer ${SUPA_KEY}`,
-          'Content-Type': 'application/json',
-          Prefer: 'resolution=merge-duplicates,return=minimal'
-        },
-        body: JSON.stringify(chunk)
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Error subiendo a ${table} (código ${res.status}): ${text}`);
-      }
+    const res =
+      await fetch(
+        `${SUPA_URL}/rest/v1/Partidos?select=id_partido,jugado,orden`,
+        {
+          headers: {
+            apikey: SUPA_KEY,
+            Authorization:
+              `Bearer ${SUPA_KEY}`
+          }
+        }
+      );
+
+
+    if (!res.ok) {
+
+      throw new Error(
+        'No se pudo leer los partidos existentes (código ' +
+        res.status +
+        ')'
+      );
+
     }
+
+
+    return res.json();
+
   }
 
-  // ---------- UI ----------
 
-  const fileInput = document.getElementById('fileInput');
-  const fileStatus = document.getElementById('fileStatus');
-  const previewCard = document.getElementById('previewCard');
-  const uploadBtn = document.getElementById('uploadBtn');
-  const uploadStatus = document.getElementById('uploadStatus');
-  const confirmedList = document.getElementById('confirmedList');
+  /* ======================================================
+     UPSERT GENÉRICO
+     ====================================================== */
+
+  async function upsertRows(
+    table,
+    rows,
+    onConflict
+  ) {
+
+    if (!rows.length) return;
+
+
+    const chunkSize = 150;
+
+
+    for (
+      let i = 0;
+      i < rows.length;
+      i += chunkSize
+    ) {
+
+      const chunk =
+        rows.slice(
+          i,
+          i + chunkSize
+        );
+
+
+      const res =
+        await fetch(
+          `${SUPA_URL}/rest/v1/${encodeURIComponent(table)}?on_conflict=${encodeURIComponent(onConflict)}`,
+          {
+            method: 'POST',
+
+            headers: {
+
+              apikey: SUPA_KEY,
+
+              Authorization:
+                `Bearer ${SUPA_KEY}`,
+
+              'Content-Type':
+                'application/json',
+
+              Prefer:
+                'resolution=merge-duplicates,return=minimal'
+
+            },
+
+            body:
+              JSON.stringify(chunk)
+
+          }
+        );
+
+
+      if (!res.ok) {
+
+        const text =
+          await res.text();
+
+
+        throw new Error(
+          `Error subiendo a ${table} (código ${res.status}): ${text}`
+        );
+
+      }
+
+    }
+
+  }
+
+
+  /* ======================================================
+     ELEMENTOS UI
+     ====================================================== */
+
+  const fileInput =
+    document.getElementById(
+      'fileInput'
+    );
+
+  const fileStatus =
+    document.getElementById(
+      'fileStatus'
+    );
+
+  const previewCard =
+    document.getElementById(
+      'previewCard'
+    );
+
+  const uploadBtn =
+    document.getElementById(
+      'uploadBtn'
+    );
+
+  const uploadStatus =
+    document.getElementById(
+      'uploadStatus'
+    );
+
+  const confirmedList =
+    document.getElementById(
+      'confirmedList'
+    );
+
+
+  /* ======================================================
+     DATOS PENDIENTES
+     ====================================================== */
 
   let pendingPartidos = null;
+
   let pendingGoles = null;
 
-  fileInput.addEventListener('change', async () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-    fileStatus.className = 'msg';
-    fileStatus.textContent = 'Leyendo archivo…';
-    previewCard.classList.add('hidden');
-    uploadStatus.classList.add('hidden');
+  let pendingGolesPorActa = null;
 
-    try {
-      const buf = await file.arrayBuffer();
-      const wb = XLSX.read(buf, { type: 'array', cellDates: true });
-      const actas = sheetToObjects(wb.Sheets['ACTAS']);
-      const golesRows = sheetToObjects(wb.Sheets['GOLES POR ACTA']);
-      if (!actas.length) throw new Error('No encontré la hoja ACTAS (o está vacía).');
 
-      const existing = await fetchExistingPartidos();
-      const existingMap = new Map(existing.map(r => [r.id_partido, r.jugado]));
-      const existingIds = new Set(existingMap.keys());
+  /* ======================================================
+     CARGAR EXCEL
+     ====================================================== */
 
-      pendingPartidos = buildPartidosPayload(actas, existingIds);
-      const confirmedIds = new Set(pendingPartidos.filter(p => p.jugado).map(p => p.id_partido));
-      pendingGoles = buildGolesPayload(golesRows, confirmedIds);
+  fileInput.addEventListener(
+    'change',
+    async () => {
 
-      const nuevos = pendingPartidos.filter(p => !existingIds.has(p.id_partido)).length;
-      const reciénConfirmados = pendingPartidos.filter(p => p.jugado && existingMap.get(p.id_partido) !== true);
+      const file =
+        fileInput.files[0];
 
-      document.getElementById('statPartidos').textContent = pendingPartidos.length;
-      document.getElementById('statNuevos').textContent = nuevos;
-      document.getElementById('statConfirmados').textContent = reciénConfirmados.length;
-      document.getElementById('statGoles').textContent = pendingGoles.length;
 
-      confirmedList.innerHTML = reciénConfirmados.length
-        ? '<p style="font-size:0.85rem;color:var(--ink-soft);margin:0.8rem 0 0.3rem">Partidos que se marcarán como jugados en esta carga:</p><ul class="confirmed">' +
-          reciénConfirmados.map(p => `<li>${p.id_partido} · ${p.equipo_local} ${p.goles_local}-${p.goles_visitante} ${p.equipo_visitante}</li>`).join('') +
-          '</ul>'
-        : '<p style="font-size:0.85rem;color:var(--ink-soft);margin:0.8rem 0 0">No hay partidos nuevos por confirmar en este archivo.</p>';
+      if (!file) return;
 
-      fileStatus.classList.add('hidden');
-      previewCard.classList.remove('hidden');
-      uploadBtn.disabled = false;
-      uploadBtn.textContent = 'Confirmar y subir a Supabase';
-    } catch (err) {
-      fileStatus.className = 'msg err';
-      fileStatus.textContent = err.message;
+
+      fileStatus.className =
+        'msg info';
+
+      fileStatus.textContent =
+        'Leyendo archivo…';
+
+
+      previewCard.classList.add(
+        'hidden'
+      );
+
+      uploadStatus.classList.add(
+        'hidden'
+      );
+
+
+      try {
+
+        /* ---------------------------------------------
+           LEER EXCEL
+           --------------------------------------------- */
+
+        const buf =
+          await file.arrayBuffer();
+
+
+        const wb =
+          XLSX.read(
+            buf,
+            {
+              type: 'array',
+              cellDates: true
+            }
+          );
+
+
+        const actas =
+          sheetToObjects(
+            wb.Sheets['ACTAS']
+          );
+
+
+        const golesRows =
+          sheetToObjects(
+            wb.Sheets['GOLES POR ACTA']
+          );
+
+
+        if (!actas.length) {
+
+          throw new Error(
+            'No encontré la hoja ACTAS (o está vacía).'
+          );
+
+        }
+
+
+        if (!golesRows.length) {
+
+          console.warn(
+            'La hoja GOLES POR ACTA está vacía o no fue encontrada.'
+          );
+
+        }
+
+
+        /* ---------------------------------------------
+           PARTIDOS EXISTENTES
+           --------------------------------------------- */
+
+        const existing =
+          await fetchExistingPartidos();
+
+
+        const existingMap =
+          new Map(
+            existing.map(
+              r => [
+                r.id_partido,
+                r
+              ]
+            )
+          );
+
+
+        const existingIds =
+          new Set(
+            existingMap.keys()
+          );
+
+
+        /* ---------------------------------------------
+           MAPA DE ACTAS
+           --------------------------------------------- */
+
+        const actasMap =
+          new Map();
+
+
+        actas.forEach(
+          r => {
+
+            const id =
+              String(
+                r['ID Partido']
+              ).trim();
+
+
+            actasMap.set(
+              id,
+              r
+            );
+
+          }
+        );
+
+
+        /* ---------------------------------------------
+           CONSTRUIR PARTIDOS
+           --------------------------------------------- */
+
+        pendingPartidos =
+          buildPartidosPayload(
+            actas,
+            existingMap
+          );
+
+
+        /* ---------------------------------------------
+           IDS CONFIRMADOS
+           --------------------------------------------- */
+
+        const confirmedIds =
+          new Set(
+            pendingPartidos
+              .filter(
+                p => p.jugado
+              )
+              .map(
+                p => p.id_partido
+              )
+          );
+
+
+        /* ---------------------------------------------
+           GOLES
+           TABLA ACTUAL
+           --------------------------------------------- */
+
+        pendingGoles =
+          golesRows
+
+            .filter(
+              r =>
+                confirmedIds.has(
+                  String(
+                    r['ID Partido']
+                  ).trim()
+                )
+            )
+
+            .map(
+              r => ({
+
+                id_partido:
+                  String(
+                    r['ID Partido']
+                  ).trim(),
+
+                equipo:
+                  r['Equipo'] ?? null,
+
+                jugador:
+                  r['Jugador'] ?? null,
+
+                goles:
+                  r['Goles'] != null
+                    ? Number(r['Goles'])
+                    : 0,
+
+                ta:
+                  r['TA'] != null
+                    ? Number(r['TA'])
+                    : 0,
+
+                tr:
+                  r['TR'] != null
+                    ? Number(r['TR'])
+                    : 0,
+
+                vuelta:
+                  r['Vuelta'] ?? null,
+
+                jornada:
+                  r['Jornada'] != null
+                    ? Number(r['Jornada'])
+                    : null
+
+              })
+            );
+
+
+        /* ---------------------------------------------
+           GOLES POR ACTA
+           TABLA NUEVA
+           --------------------------------------------- */
+
+        pendingGolesPorActa =
+          buildGolesPorActaPayload(
+            golesRows,
+            confirmedIds,
+            actasMap
+          );
+
+
+        /* ---------------------------------------------
+           ESTADÍSTICAS
+           --------------------------------------------- */
+
+        const nuevos =
+          pendingPartidos.filter(
+            p =>
+              !existingIds.has(
+                p.id_partido
+              )
+          ).length;
+
+
+        const recienConfirmados =
+          pendingPartidos.filter(
+            p =>
+              p.jugado &&
+              existingMap.get(
+                p.id_partido
+              )?.jugado !== true
+          );
+
+
+        document.getElementById(
+          'statPartidos'
+        ).textContent =
+          pendingPartidos.length;
+
+
+        document.getElementById(
+          'statNuevos'
+        ).textContent =
+          nuevos;
+
+
+        document.getElementById(
+          'statConfirmados'
+        ).textContent =
+          recienConfirmados.length;
+
+
+        document.getElementById(
+          'statGoles'
+        ).textContent =
+          pendingGolesPorActa.length;
+
+
+        /* ---------------------------------------------
+           LISTA DE PARTIDOS CONFIRMADOS
+           --------------------------------------------- */
+
+        confirmedList.innerHTML =
+          recienConfirmados.length
+
+            ? `
+              <p
+                style="
+                  font-size:0.85rem;
+                  color:var(--ink-soft);
+                  margin:0.8rem 0 0.3rem
+                "
+              >
+                Partidos que se marcarán como
+                jugados en esta carga:
+              </p>
+
+              <ul class="confirmed">
+
+                ${
+                  recienConfirmados
+                    .map(
+                      p => `
+                        <li>
+                          ${p.id_partido}
+                          ·
+                          ${p.equipo_local}
+                          ${p.goles_local}
+                          -
+                          ${p.goles_visitante}
+                          ${p.equipo_visitante}
+                        </li>
+                      `
+                    )
+                    .join('')
+                }
+
+              </ul>
+            `
+
+            : `
+              <p
+                style="
+                  font-size:0.85rem;
+                  color:var(--ink-soft);
+                  margin:0.8rem 0 0
+                "
+              >
+                No hay partidos nuevos por confirmar
+                en este archivo.
+              </p>
+            `;
+
+
+        /* ---------------------------------------------
+           MOSTRAR VISTA PREVIA
+           --------------------------------------------- */
+
+        fileStatus.classList.add(
+          'hidden'
+        );
+
+        previewCard.classList.remove(
+          'hidden'
+        );
+
+
+        uploadBtn.disabled = false;
+
+        uploadBtn.textContent =
+          'Confirmar y subir a Supabase';
+
+
+      } catch (err) {
+
+        console.error(err);
+
+
+        fileStatus.className =
+          'msg err';
+
+
+        fileStatus.textContent =
+          err.message;
+
+
+      }
+
     }
-  });
+  );
 
-  uploadBtn.addEventListener('click', async () => {
-    if (!pendingPartidos) return;
-    uploadBtn.disabled = true;
-    uploadBtn.textContent = 'Subiendo…';
-    uploadStatus.classList.add('hidden');
-    try {
-      await upsertRows('Partidos', pendingPartidos, 'id_partido');
-      await upsertRows('Goles', pendingGoles, 'id_partido,jugador');
-      uploadStatus.className = 'msg ok';
-      uploadStatus.textContent = `Listo. Se subieron ${pendingPartidos.length} partidos y ${pendingGoles.length} registros de goles. Ya puedes revisar el sitio.`;
-      uploadStatus.classList.remove('hidden');
-      uploadBtn.textContent = 'Subido ✓';
-    } catch (err) {
-      uploadStatus.className = 'msg err';
-      uploadStatus.textContent = err.message;
-      uploadStatus.classList.remove('hidden');
-      uploadBtn.disabled = false;
-      uploadBtn.textContent = 'Reintentar';
+
+  /* ======================================================
+     SUBIR A SUPABASE
+     ====================================================== */
+
+  uploadBtn.addEventListener(
+    'click',
+    async () => {
+
+      if (
+        !pendingPartidos
+      ) return;
+
+
+      uploadBtn.disabled =
+        true;
+
+
+      uploadBtn.textContent =
+        'Subiendo…';
+
+
+      uploadStatus.classList.add(
+        'hidden'
+      );
+
+
+      try {
+
+        /* ---------------------------------------------
+           1. ACTUALIZAR PARTIDOS
+           --------------------------------------------- */
+
+        await upsertRows(
+          'Partidos',
+          pendingPartidos,
+          'id_partido'
+        );
+
+
+        /* ---------------------------------------------
+           2. ACTUALIZAR GOLES
+           TABLA EXISTENTE
+           --------------------------------------------- */
+
+        if (
+          pendingGoles.length
+        ) {
+
+          await upsertRows(
+            'Goles',
+            pendingGoles,
+            'id_partido,jugador'
+          );
+
+        }
+
+
+        /* ---------------------------------------------
+           3. ACTUALIZAR GOLES POR ACTA
+           --------------------------------------------- */
+
+        if (
+          pendingGolesPorActa.length
+        ) {
+
+          await upsertRows(
+            'Goles_Por_Acta',
+            pendingGolesPorActa,
+            'id_partido,jugador'
+          );
+
+        }
+
+
+        /* ---------------------------------------------
+           ÉXITO
+           --------------------------------------------- */
+
+        uploadStatus.className =
+          'msg ok';
+
+
+        uploadStatus.textContent =
+          `Listo. Se actualizaron ` +
+          `${pendingPartidos.length} partidos y ` +
+          `${pendingGolesPorActa.length} registros ` +
+          `de GOLES POR ACTA en Supabase.`;
+
+
+        uploadStatus.classList.remove(
+          'hidden'
+        );
+
+
+        uploadBtn.textContent =
+          'Actualizado ✓';
+
+
+      } catch (err) {
+
+        console.error(err);
+
+
+        uploadStatus.className =
+          'msg err';
+
+
+        uploadStatus.textContent =
+          err.message;
+
+
+        uploadStatus.classList.remove(
+          'hidden'
+        );
+
+
+        uploadBtn.disabled =
+          false;
+
+
+        uploadBtn.textContent =
+          'Reintentar';
+
+      }
+
     }
-  });
+  );
+
 })();
+
 </script>
+
 </body>
 </html>
