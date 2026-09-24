@@ -11,6 +11,54 @@
 <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <style>
+  /* --- Estilos para el calendario desplegable --- */
+details.cal-vuelta-details {
+  margin-bottom: 2rem;
+}
+
+/* Ocultar el marcador nativo feo de Chrome/Safari */
+details.cal-vuelta-details summary.cal-vuelta::-webkit-details-marker {
+  display: none;
+}
+
+details.cal-vuelta-details summary.cal-vuelta {
+  cursor: pointer;
+  list-style: none; /* Oculta la flecha por defecto */
+  display: flex;
+  justify-content: space-between; /* Manda la flecha nueva a la derecha */
+  align-items: center;
+  user-select: none;
+}
+
+/* Flecha personalizada a la derecha del título */
+details.cal-vuelta-details summary.cal-vuelta::after {
+  content: "▼";
+  font-size: 0.9rem;
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+  transition: transform 0.2s ease;
+}
+
+/* Girar la flecha cuando el panel está abierto */
+details.cal-vuelta-details[open] summary.cal-vuelta::after {
+  content: "▲";
+}
+
+/* Animación suave para el contenido al abrir */
+.cal-vuelta-content {
+  padding-top: 10px;
+  animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
   :root {
     --pitch-dark: #0B2545;
     --pitch: #1D5BA6;
@@ -949,6 +997,252 @@
     thead th, tbody td { padding: 0.6rem 0.4rem; font-size: 0.88rem; }
     .tab { font-size: 0.72rem; padding: 0.6rem 0.2rem; }
   }
+
+  /* --- Filtro de Equipo --- */
+.cal-filter-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.cal-select {
+  background: #1e293b;
+  color: #fff;
+  border: 1px solid #334155;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.cal-select:focus {
+  border-color: #38bdf8;
+}
+
+.highlight-team .cal-name {
+  color: #38bdf8;
+  font-weight: bold;
+}
+
+/* --- Encuesta de Predicción --- */
+.poll-container {
+  margin-top: 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.poll-title {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+
+.poll-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.poll-btn {
+  background: #1e293b;
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.poll-btn:hover {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+.poll-bar-wrapper {
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.poll-label {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.poll-bar {
+  background: #334155;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+ .poll-fill {
+  background: #38bdf8;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* --- Encuestas de toda la jornada, desplegables --- */
+.jornada-polls {
+  margin-top: 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid #334155;
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: left;
+}
+.jornada-polls-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(30, 41, 59, 0.55);
+}
+.jornada-polls-title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+.jornada-polls-toggle {
+  border: 1px solid #475569;
+  background: transparent;
+  color: #cbd5e1;
+  border-radius: 6px;
+  padding: 5px 9px;
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+.jornada-polls-list {
+  display: flex;
+  flex-direction: column;
+}
+.jornada-polls-list.is-minimized {
+  display: none;
+}
+.poll-match-item {
+  border-top: 1px solid #334155;
+}
+.poll-match-item:first-child { border-top: none; }
+.poll-match-toggle {
+  width: 100%;
+  min-height: 44px;
+  border: none;
+  background: transparent;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.78rem;
+}
+.poll-match-toggle:hover { background: rgba(51, 65, 85, 0.35); }
+.poll-match-item.open .poll-match-toggle { background: rgba(30, 41, 59, 0.55); }
+.poll-match-teams {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.poll-match-arrow { flex: none; color: #94a3b8; }
+.poll-match-content { display: none; padding: 0 10px 10px; }
+.poll-match-item.open .poll-match-content { display: block; }
+.poll-match-content .poll-container { margin-top: 0; }
+
+/* MVP elegido manualmente: se muestra fuera de Goleadores */
+.mvp-hero {
+  margin: 0.85rem auto 0;
+  max-width: 360px;
+}
+.mvp-hero .mvp-card { margin-bottom: 0; }
+
+@media (max-width: 380px) {
+  .poll-match-toggle { padding-left: 9px; padding-right: 9px; }
+  .jornada-polls-head { align-items: flex-start; }
+}
+
+/* --- Tarjeta MVP --- */
+.mvp-card {
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+  border: 1px solid #6366f1;
+  border-radius: 12px;
+  padding: 14px;
+  position: relative;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+}
+
+.mvp-badge {
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: #a5b4fc;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.mvp-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mvp-star {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #6366f1;
+  background: rgba(99, 102, 241, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.mvp-avatar img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #6366f1;
+  object-fit: cover;
+}
+
+.mvp-name {
+  color: #fff;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.mvp-team {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mvp-stat {
+  display: inline-block;
+  background: #312e81;
+  color: #c7d2fe;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
 </style>
 </head>
 <body>
@@ -963,6 +1257,7 @@
       <span id="syncText">Cargando…</span>
     </div>
     <div class="next-match" id="nextMatch" hidden></div>
+    <div class="mvp-hero" id="mvpHero" hidden></div>
   </div>
 </div>
 
@@ -995,28 +1290,17 @@
   let golQuery = '';
   let lastPartidos = [];
   let previousChampion = null;
+  let lastGoleadoresData = [];
+  let lastMvpRows = [];
 
-  // Logos por equipo: nombre EXACTO tal como aparece en Supabase -> data URI o URL.
-  // Esto es un respaldo manual; si el equipo ya tiene logo_url en Supabase, ese manda.
+  // ================================================================
+  // MVP / JUGADOR DE LA JORNADA
+  // Se elige desde Supabase, en la tabla MVP_Jornadas.
+  // Columnas esperadas: jornada, jugador, equipo, goles, foto_url
+  // ================================================================
+
   const TEAM_LOGOS = {};
   let LIVE_LOGOS = {};
-
-  // Horario fijo de la Segunda Vuelta (día/hora por jornada, en el mismo orden
-  // en que se juegan los partidos de esa jornada). La tabla Partidos no guarda
-  // hora, así que esto solo es para mostrarla junto al resultado.
-  const DIA_SEGUNDA = {
-    1: 'Sábado', 2: 'Martes y Miércoles', 3: 'Sábado', 4: 'Martes y Miércoles',
-    5: 'Sábado', 6: 'Martes y Miércoles', 7: 'Sábado'
-  };
-  const HORAS_SEGUNDA = {
-    1: ['4:00', '5:00', '6:00', '7:00'],
-    2: ['Martes 6:00', 'Martes 7:00', 'Miércoles 6:00', 'Miércoles 7:00'],
-    3: ['4:00', '5:00', '6:00', '7:00'],
-    4: ['Martes 6:00', 'Martes 7:00', 'Miércoles 6:00', 'Miércoles 7:00'],
-    5: ['4:00', '5:00', '6:00', '7:00'],
-    6: ['Martes 6:00', 'Martes 7:00', 'Miércoles 6:00', 'Miércoles 7:00'],
-    7: ['4:00', '5:00', '6:00', '7:00']
-  };
   let TEAM_RANK = {};
 
   function teamHue(name) {
@@ -1153,7 +1437,6 @@
     }[c]));
   }
 
-  // Todos los escudos de la página abren la ficha del equipo, no solo los de Posiciones.
   document.addEventListener('click', e => {
     const crest = e.target.closest('.team-crest');
     if (!crest || !crest.dataset.team) return;
@@ -1392,7 +1675,7 @@
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({ files: [file], title: 'Posiciones · Torneo de Fútbol 5' });
-          } catch (e) { /* el usuario canceló el share, no hacer nada */ }
+          } catch (e) { }
         } else {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -1410,39 +1693,47 @@
     }
   }
 
-  // Fechas de la Segunda Vuelta para los partidos aún pendientes.
-  // La tabla Partidos puede venir sin fecha para encuentros futuros.
-  const FECHAS_SEGUNDA = {
-    5: ['2026-09-19', '2026-09-19', '2026-09-19', '2026-09-19'],
-    6: ['2026-09-22', '2026-09-22', '2026-09-23', '2026-09-23'],
-    7: ['2026-09-26', '2026-09-26', '2026-09-26', '2026-09-26']
-  };
+  // --- NUEVA LÓGICA DE FECHAS/HORAS 100% DINÁMICA ---
+  function matchScheduleInfo(m) {
+  let dateObj = null;
+  let displayHora = 'Hora por confirmar';
 
-  function matchScheduleInfo(match) {
-    const jornada = Number(match.jornada);
-    const idx = (lastPartidos || []).filter(m => m.vuelta === match.vuelta && Number(m.jornada) === jornada).findIndex(m => m.id_partido === match.id_partido);
-    const horas = match.vuelta === 'Segunda' ? HORAS_SEGUNDA[jornada] : null;
-    const rawHora = horas && horas[idx] ? horas[idx] : '';
-    let dateStr = match.fecha || (match.vuelta === 'Segunda' ? (FECHAS_SEGUNDA[jornada]?.[idx] || FECHAS_SEGUNDA[jornada]?.[0]) : null);
-    let hour = null, minute = 0;
-    let displayHora = rawHora;
-    if (rawHora) {
-      const m = rawHora.match(/(\d{1,2}):(\d{2})/);
-      if (m) {
-        hour = Number(m[1]);
-        minute = Number(m[2]);
-        // En este torneo las horas 4:00, 5:00, 6:00 y 7:00 son de la tarde.
-        // También aplica a las horas que vienen precedidas por Martes/Miércoles.
-        if (hour >= 1 && hour <= 11) hour += 12;
-        displayHora = `${hour - 12}:` + String(minute).padStart(2,'0') + ' PM';
+  if (m.fecha && m.hora) {
+    let hrs = 0, mins = 0;
+    let horaValida = false;
+
+    // Si viene en formato ISO de Excel (1899-12-30T...)
+    if (typeof m.hora === 'string' && m.hora.includes('T')) {
+      const d = new Date(m.hora);
+      if (!isNaN(d.getTime())) {
+        hrs = d.getHours();
+        mins = d.getMinutes();
+        horaValida = true;
+      }
+    } else if (typeof m.hora === 'string') {
+      // Si viene en formato normal "18:00" o "18:00:00"
+      const parts = m.hora.split(':');
+      if (parts.length >= 2) {
+        hrs = parseInt(parts[0], 10);
+        mins = parseInt(parts[1], 10);
+        horaValida = true;
       }
     }
-    if (dateStr && hour != null) {
-      const dt = new Date(`${dateStr}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:00-06:00`);
-      return { rawHora, displayHora, dateStr, hour, minute, date: dt };
+
+    if (horaValida) {
+      const ampm = hrs >= 12 ? 'PM' : 'AM';
+      const displayHrs = hrs % 12 || 12;
+      const displayMins = mins < 10 ? '0' + mins : mins;
+      displayHora = `${displayHrs}:${displayMins} ${ampm}`;
+
+      // Reconstruimos la fecha real del partido con la hora corregida
+      const [year, month, day] = m.fecha.split('-').map(Number);
+      dateObj = new Date(year, month - 1, day, hrs, mins, 0);
     }
-    return { rawHora, displayHora, dateStr, hour, minute, date: null };
   }
+
+  return { displayHora, date: dateObj };
+}
 
   function formatMatchDate(info) {
     if (!info.dateStr) return '';
@@ -1478,19 +1769,181 @@
     nextMatchCountdownTimer = setInterval(paint, 1000);
   }
 
+  // --- ENCUESTAS DE PREDICCIÓN POR JORNADA ---
+  function getPollVotes(matchId) {
+    const pollKey = `poll_match_${matchId}`;
+    try {
+      return JSON.parse(localStorage.getItem(`${pollKey}_counts`)) || { local: 12, empate: 5, visitante: 8 };
+    } catch (e) {
+      return { local: 12, empate: 5, visitante: 8 };
+    }
+  }
+
+  function submitVote(matchId, option) {
+    const pollKey = `poll_match_${matchId}`;
+    const votes = getPollVotes(matchId);
+    if (!['local', 'empate', 'visitante'].includes(option)) return;
+    votes[option] = Number(votes[option] || 0) + 1;
+    localStorage.setItem(`${pollKey}_counts`, JSON.stringify(votes));
+    localStorage.setItem(pollKey, option);
+    renderNextMatch();
+  }
+  window.submitVote = submitVote;
+
+  function renderPoll(matchId, localName, visitanteName) {
+    const pollKey = `poll_match_${matchId}`;
+    const savedVote = localStorage.getItem(pollKey);
+    const votes = getPollVotes(matchId);
+    const totalVotes = votes.local + votes.empate + votes.visitante;
+    const calcPct = val => totalVotes > 0 ? Math.round((val / totalVotes) * 100) : 33;
+
+    if (savedVote) {
+      return `
+        <div class="poll-container">
+          <p class="poll-title">📊 Pronóstico de la afición</p>
+          <div class="poll-results">
+            <div class="poll-bar-wrapper">
+              <span class="poll-label">${escapeHtml(localName)} (${calcPct(votes.local)}%)</span>
+              <div class="poll-bar"><div class="poll-fill" style="width: ${calcPct(votes.local)}%"></div></div>
+            </div>
+            <div class="poll-bar-wrapper">
+              <span class="poll-label">Empate (${calcPct(votes.empate)}%)</span>
+              <div class="poll-bar"><div class="poll-fill" style="width: ${calcPct(votes.empate)}%"></div></div>
+            </div>
+            <div class="poll-bar-wrapper">
+              <span class="poll-label">${escapeHtml(visitanteName)} (${calcPct(votes.visitante)}%)</span>
+              <div class="poll-bar"><div class="poll-fill" style="width: ${calcPct(votes.visitante)}%"></div></div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    return `
+      <div class="poll-container">
+        <p class="poll-title">🔮 ¿Quién ganará este encuentro?</p>
+        <div class="poll-buttons">
+          <button class="poll-btn" type="button" data-vote-match="${escapeHtml(matchId)}" data-vote-option="local">${escapeHtml(localName)}</button>
+          <button class="poll-btn" type="button" data-vote-match="${escapeHtml(matchId)}" data-vote-option="empate">Empate</button>
+          <button class="poll-btn" type="button" data-vote-match="${escapeHtml(matchId)}" data-vote-option="visitante">${escapeHtml(visitanteName)}</button>
+        </div>
+      </div>`;
+  }
+
+  function renderJornadaPolls(next, unplayed) {
+    const jornadaMatches = unplayed
+      .filter(m => String(m.jornada) === String(next.jornada))
+      .sort((a, b) => {
+        const ia = parseInt(String(a.id_partido).replace(/\D/g, ''), 10) || 0;
+        const ib = parseInt(String(b.id_partido).replace(/\D/g, ''), 10) || 0;
+        return ia - ib;
+      });
+
+    if (!jornadaMatches.length) return '';
+
+    return `
+      <div class="jornada-polls" id="jornadaPolls">
+        <div class="jornada-polls-head">
+          <p class="jornada-polls-title">📊 Encuestas · Jornada ${escapeHtml(next.jornada)}</p>
+          <button class="jornada-polls-toggle" type="button" id="toggleJornadaPolls" aria-expanded="true">Minimizar</button>
+        </div>
+        <div class="jornada-polls-list" id="jornadaPollsList">
+          ${jornadaMatches.map((m, index) => `
+            <div class="poll-match-item ${index === 0 ? 'open' : ''}" data-poll-item="${escapeHtml(m.id_partido)}">
+              <button class="poll-match-toggle" type="button" data-poll-toggle="${escapeHtml(m.id_partido)}" aria-expanded="${index === 0 ? 'true' : 'false'}">
+                <span class="poll-match-teams">${escapeHtml(m.equipo_local)} <strong>vs</strong> ${escapeHtml(m.equipo_visitante)}</span>
+                <span class="poll-match-arrow">${index === 0 ? '▲' : '▼'}</span>
+              </button>
+              <div class="poll-match-content">${renderPoll(m.id_partido, m.equipo_local, m.equipo_visitante)}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  function bindJornadaPolls() {
+    const root = document.getElementById('jornadaPolls');
+    if (!root) return;
+
+    const list = document.getElementById('jornadaPollsList');
+    const toggleAll = document.getElementById('toggleJornadaPolls');
+
+    root.querySelectorAll('[data-vote-match]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        submitVote(btn.dataset.voteMatch, btn.dataset.voteOption);
+      });
+    });
+
+    root.querySelectorAll('[data-poll-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = root.querySelector(`[data-poll-item="${CSS.escape(btn.dataset.pollToggle)}"]`);
+        if (!item) return;
+        const willOpen = !item.classList.contains('open');
+        root.querySelectorAll('.poll-match-item').forEach(other => {
+          other.classList.remove('open');
+          const otherBtn = other.querySelector('[data-poll-toggle]');
+          if (otherBtn) {
+            otherBtn.setAttribute('aria-expanded', 'false');
+            const arrow = otherBtn.querySelector('.poll-match-arrow');
+            if (arrow) arrow.textContent = '▼';
+          }
+        });
+        if (willOpen) {
+          item.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+          const arrow = btn.querySelector('.poll-match-arrow');
+          if (arrow) arrow.textContent = '▲';
+        }
+      });
+    });
+
+    if (toggleAll && list) {
+      // Control global de las encuestas. Usamos el estado y el display
+      // directamente para que funcione incluso si el navegador tiene
+      // alguna particularidad con la clase CSS.
+      toggleAll.dataset.minimized = 'false';
+      toggleAll.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const isMinimized = toggleAll.dataset.minimized === 'true';
+        toggleAll.dataset.minimized = String(!isMinimized);
+        list.classList.toggle('is-minimized', !isMinimized);
+        list.style.display = !isMinimized ? 'none' : 'flex';
+        toggleAll.textContent = !isMinimized ? 'Maximizar' : 'Minimizar';
+        toggleAll.setAttribute('aria-expanded', String(isMinimized));
+      });
+    }
+  }
+
+  // --- TARJETA PRÓXIMO PARTIDO + ENCUESTAS DE LA MISMA JORNADA ---
   function renderNextMatch() {
     const nextMatchEl = document.getElementById('nextMatch');
     if (!nextMatchEl) return;
-    const next = (lastPartidos || []).find(m => !m.jugado);
-    if (!next) {
+
+    const unplayed = (lastPartidos || []).filter(m => !m.jugado);
+
+    if (!unplayed.length) {
       nextMatchEl.hidden = true;
       if (nextMatchCountdownTimer) clearInterval(nextMatchCountdownTimer);
       return;
     }
+
+    unplayed.sort((a, b) => {
+      if (!a.fecha && b.fecha) return 1;
+      if (a.fecha && !b.fecha) return -1;
+      if (!a.fecha && !b.fecha) return 0;
+      const dateA = new Date(a.fecha).getTime();
+      const dateB = new Date(b.fecha).getTime();
+      if (dateA !== dateB) return dateA - dateB;
+      const idA = parseInt(String(a.id_partido).replace(/\D/g, ''), 10) || 0;
+      const idB = parseInt(String(b.id_partido).replace(/\D/g, ''), 10) || 0;
+      return idA - idB;
+    });
+
+    const next = unplayed[0];
     nextMatchEl.hidden = false;
     const info = matchScheduleInfo(next);
     const dateLabel = formatMatchDate(info);
-    const timeLabel = info.displayHora || 'Hora por confirmar';
+
     nextMatchEl.innerHTML = `
       <p class="next-match-label">Próximo partido</p>
       <div class="nm-teams">
@@ -1498,9 +1951,12 @@
         <span class="nm-vs">vs</span>
         <div class="nm-team">${crestHtml(next.equipo_visitante)}<span>${escapeHtml(next.equipo_visitante)}</span></div>
       </div>
-      <p class="next-match-time">${escapeHtml(timeLabel)}</p>
+      <p class="next-match-time">${escapeHtml(info.displayHora)}</p>
       <p class="next-match-countdown" id="nextMatchCountdown">${info.date ? formatCountdown(info.date.getTime() - Date.now()) : 'Cuenta regresiva disponible cuando haya fecha y hora'}</p>
-      <p class="next-match-meta">${dateLabel ? escapeHtml(dateLabel) + ' · ' : ''}Jornada ${next.jornada} · ${next.vuelta === 'Primera' ? '1ª vuelta' : '2ª vuelta'}</p>`;
+      <p class="next-match-meta">${dateLabel ? escapeHtml(dateLabel) + ' · ' : ''}Jornada ${escapeHtml(next.jornada)} · ${next.vuelta === 'Primera' ? '1ª vuelta' : '2ª vuelta'}</p>
+      ${renderJornadaPolls(next, unplayed)}`;
+
+    bindJornadaPolls();
     startNextMatchCountdown(next);
   }
 
@@ -1561,7 +2017,57 @@
     if (shareBtn) shareBtn.addEventListener('click', () => shareTable(shareBtn));
   }
 
-  function renderGoleadores(rows) {
+function renderMvpCard(mvpData) {
+  // mvpData = { nombre: 'Carlos Zelaya', equipo: 'Milan F.C', goles: 3, fotoUrl: '...' }
+  if (!mvpData) return '';
+
+  return `
+    <div class="mvp-card">
+      <div class="mvp-badge">⭐ JUGADOR DE LA JORNADA${mvpData.jornada ? ` · JORNADA ${escapeHtml(mvpData.jornada)}` : ''}</div>
+      <div class="mvp-content">
+        <div class="mvp-avatar" aria-hidden="true" title="Jugador de la jornada">
+          <span class="mvp-star">⭐</span>
+        </div>
+        <div class="mvp-info">
+          <h4 class="mvp-name">${escapeHtml(mvpData.nombre)}</h4>
+          <p class="mvp-team">${crestHtml(mvpData.equipo)} ${escapeHtml(mvpData.equipo)}</p>
+          ${mvpData.goles != null && mvpData.goles !== '' ? `<span class="mvp-stat">🔥 ${escapeHtml(mvpData.goles)} Goles anotados</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMvpPorJornada() {
+  const el = document.getElementById('mvpHero');
+  if (!el) return;
+
+  const jugadas = (lastPartidos || []).filter(m => m.jugado);
+  const jornadasJugadas = [...new Set(jugadas.map(m => Number(m.jornada)).filter(Number.isFinite))].sort((a,b) => b-a);
+  const jornadaActual = jornadasJugadas.length ? jornadasJugadas[0] : null;
+
+  // El MVP se selecciona manualmente desde Supabase.
+  const row = jornadaActual != null
+    ? lastMvpRows.find(r => Number(r.jornada) === jornadaActual)
+    : null;
+
+  if (!row || !row.jugador) {
+    el.hidden = true;
+    el.innerHTML = '';
+    return;
+  }
+
+  el.hidden = false;
+  el.innerHTML = renderMvpCard({
+    nombre: row.jugador,
+    equipo: row.equipo || '',
+    goles: row.goles,
+    fotoUrl: row.foto_url || '',
+    jornada: row.jornada
+  });
+}
+
+function renderGoleadores(rows) {
     if (!rows.length) {
       panelGol.innerHTML = stateHtml('Todavía no hay goles registrados', 'Aparecerán aquí en cuanto se carguen las actas.', false);
       return;
@@ -1572,10 +2078,12 @@
       const rankB = TEAM_RANK[b.equipo] ?? Infinity;
       return rankA - rankB;
     }).map((r, i) => ({ ...r, _pos: i + 1 }));
+
     const q = golQuery.trim().toLowerCase();
     const filtered = q
       ? sorted.filter(r => r.jugador.toLowerCase().includes(q) || r.equipo.toLowerCase().includes(q))
       : sorted;
+
     const limit = (q || goleadoresExpanded) ? filtered.length : Math.min(15, filtered.length);
     const shown = filtered.slice(0, limit);
     const body = shown.length ? shown.map((r, i) => `
@@ -1584,24 +2092,30 @@
         <td class="player"><div class="name-cell">${crestHtml(r.equipo)}<span>${escapeHtml(r.jugador)}<button class="player-team-link" data-team="${escapeHtml(r.equipo)}">${escapeHtml(r.equipo)}</button></span></div></td>
         <td class="num pts"><span class="countup" data-count="${r.goles}">0</span></td>
       </tr>`).join('') : `<tr><td colspan="3" class="empty-row">Sin resultados para "${escapeHtml(golQuery)}"</td></tr>`;
+    
     const moreBtn = (!q && filtered.length > 15)
       ? `<button class="more" id="toggleMore">${goleadoresExpanded ? 'Ver menos' : `Ver los ${filtered.length}`}</button>`
       : '';
+
     panelGol.innerHTML = `
       <div class="search-wrap"><input type="search" class="search-box" id="golSearch" placeholder="Buscar jugador o equipo…" value="${escapeHtml(golQuery)}"></div>
       <table>
         <thead><tr><th></th><th>Jugador</th><th class="num">Goles</th></tr></thead>
         <tbody>${body}</tbody>
       </table>${moreBtn}`;
+
     animateCountUp(panelGol);
+
     panelGol.querySelectorAll('.player-team-link').forEach(btn => {
       btn.addEventListener('click', () => openTeamModal(btn.dataset.team));
     });
+
     const toggle = document.getElementById('toggleMore');
     if (toggle) toggle.addEventListener('click', () => {
       goleadoresExpanded = !goleadoresExpanded;
       renderGoleadores(rows);
     });
+
     const input = document.getElementById('golSearch');
     input.addEventListener('input', e => {
       golQuery = e.target.value;
@@ -1612,40 +2126,132 @@
     });
   }
 
-  function renderCalendario(rows) {
-    if (!rows.length) {
-      panelCal.innerHTML = stateHtml('Todavía no hay calendario', 'Los partidos aparecen aquí en cuanto se carguen.', false);
-      return;
-    }
-    let html = '';
-    ['Segunda'].forEach(vuelta => {
-      const matches = rows.filter(r => r.vuelta === vuelta);
-      if (!matches.length) return;
-      html += `<h3 class="cal-vuelta">${vuelta === 'Primera' ? 'Primera vuelta' : 'Segunda vuelta'}</h3>`;
-      const jornadas = [...new Set(matches.map(r => r.jornada))].sort((a, b) => a - b);
-      jornadas.forEach(j => {
-        const dayLabel = vuelta === 'Segunda' ? DIA_SEGUNDA[j] : null;
-        html += `<div class="cal-jornada"><span>Jornada ${j}</span><span class="cal-jornada-line"></span>${dayLabel ? `<span class="cal-jornada-day">${escapeHtml(dayLabel)}</span>` : ''}</div>`;
-        const horas = vuelta === 'Segunda' ? HORAS_SEGUNDA[j] : null;
-        matches.filter(r => r.jornada === j).forEach((m, idx) => {
-          const score = m.jugado
-            ? `<span class="cal-score">${m.goles_local} - ${m.goles_visitante}</span>`
-            : `<span class="cal-score pending">vs</span>`;
-          const hora = horas && horas[idx] ? `<div class="cal-match-time">${escapeHtml(horas[idx])}</div>` : '';
-          html += `
-            <div class="cal-match">
-              ${hora}
-              <div class="cal-match-row">
-                <div class="cal-side">${crestHtml(m.equipo_local)}<span class="cal-name">${escapeHtml(m.equipo_local)}</span></div>
-                ${score}
-                <div class="cal-side right">${crestHtml(m.equipo_visitante)}<span class="cal-name">${escapeHtml(m.equipo_visitante)}</span></div>
-              </div>
-            </div>`;
-        });
+// 1. Variable global para el filtro
+window.selectedEquipo = 'todos';
+
+// 2. Función global para responder al cambio de opción en el selector
+window.filterCalendarioByTeam = function(teamName) {
+  window.selectedEquipo = teamName;
+  if (window.lastCalendarioData) {
+    renderCalendario(window.lastCalendarioData);
+  }
+};
+
+// 3. Función principal del Calendario
+function renderCalendario(rows) {
+  window.lastCalendarioData = rows;
+
+  if (!rows || !rows.length) {
+    panelCal.innerHTML = stateHtml('Todavía no hay calendario', 'Los partidos aparecen aquí en cuanto se carguen.', false);
+    return;
+  }
+
+  const sel = window.selectedEquipo || 'todos';
+
+  // Obtener lista única de equipos ignorando espacios extras
+  const equipos = [...new Set(rows.flatMap(r => [r.equipo_local, r.equipo_visitante]))]
+    .filter(Boolean)
+    .map(e => e.trim())
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .sort();
+
+  // Selector HTML
+  let selectHtml = `
+    <div class="cal-filter-container">
+      <label for="cal-team-select">Filtrar por equipo:</label>
+      <select id="cal-team-select" class="cal-select" onchange="window.filterCalendarioByTeam(this.value)">
+        <option value="todos" ${sel === 'todos' ? 'selected' : ''}>⚽ Todos los equipos</option>
+        ${equipos.map(eq => `<option value="${escapeHtml(eq)}" ${sel === eq ? 'selected' : ''}>${escapeHtml(eq)}</option>`).join('')}
+      </select>
+    </div>
+  `;
+
+  // Filtrar filas comparando los nombres limpios
+  const filteredRows = sel === 'todos' 
+    ? rows 
+    : rows.filter(r => 
+        (r.equipo_local && r.equipo_local.trim() === sel) || 
+        (r.equipo_visitante && r.equipo_visitante.trim() === sel)
+      );
+
+  let html = selectHtml;
+
+  if (!filteredRows.length) {
+    html += stateHtml('Sin partidos', `No se encontraron encuentros para ${sel}.`, false);
+    panelCal.innerHTML = `<div class="cal-list">${html}</div>`;
+    return;
+  }
+
+  ['Primera', 'Segunda'].forEach(vuelta => {
+    const matches = filteredRows.filter(r => r.vuelta === vuelta);
+    if (!matches.length) return;
+    
+    // Si hay un filtro activo, la vuelta se mantiene desplegada automáticamente
+    const isOpen = (vuelta === 'Segunda' || sel !== 'todos') ? 'open' : '';
+    
+    html += `<details class="cal-vuelta-details" ${isOpen}>`;
+    html += `  <summary class="cal-vuelta">${vuelta === 'Primera' ? 'Primera vuelta' : 'Segunda vuelta'}</summary>`;
+    html += `  <div class="cal-vuelta-content">`;
+    
+    const jornadas = [...new Set(matches.map(r => r.jornada))].sort((a, b) => a - b);
+    
+    jornadas.forEach(j => {
+      const jornadaMatches = matches.filter(r => r.jornada === j);
+      
+      let dayLabel = '';
+      const primerConFecha = jornadaMatches.find(m => m.fecha);
+      if (primerConFecha) {
+        const d = new Date(`${primerConFecha.fecha}T12:00:00-06:00`);
+        if (!Number.isNaN(d.getTime())) {
+           dayLabel = d.toLocaleDateString('es-HN', { weekday:'long', day:'numeric', month:'short' });
+           dayLabel = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
+        }
+      }
+
+      html += `<div class="cal-jornada"><span>Jornada ${j}</span><span class="cal-jornada-line"></span>${dayLabel ? `<span class="cal-jornada-day">${escapeHtml(dayLabel)}</span>` : ''}</div>`;
+      
+      jornadaMatches.forEach(m => {
+        const score = m.jugado
+          ? `<span class="cal-score">${m.goles_local} - ${m.goles_visitante}</span>`
+          : `<span class="cal-score pending">vs</span>`;
+        
+        let horaHtml = '';
+        if (m.hora) {
+          const info = matchScheduleInfo(m);
+          if (info.displayHora !== 'Hora por confirmar') {
+            horaHtml = `<div class="cal-match-time">${escapeHtml(info.displayHora)}</div>`;
+          }
+        }
+
+        const isLocalHighlight = sel !== 'todos' && m.equipo_local && m.equipo_local.trim() === sel ? 'highlight-team' : '';
+        const isVisitHighlight = sel !== 'todos' && m.equipo_visitante && m.equipo_visitante.trim() === sel ? 'highlight-team' : '';
+
+        html += `
+          <div class="cal-match">
+            ${horaHtml}
+            <div class="cal-match-row">
+              <div class="cal-side ${isLocalHighlight}">${crestHtml(m.equipo_local)}<span class="cal-name">${escapeHtml(m.equipo_local)}</span></div>
+              ${score}
+              <div class="cal-side right ${isVisitHighlight}">${crestHtml(m.equipo_visitante)}<span class="cal-name">${escapeHtml(m.equipo_visitante)}</span></div>
+            </div>
+          </div>`;
       });
     });
-    panelCal.innerHTML = `<div class="cal-list">${html}</div>`;
+    
+    html += `  </div>`;
+    html += `</details>`;
+  });
+
+  panelCal.innerHTML = `<div class="cal-list">${html}</div>`;
+}
+
+// Función auxiliar para re-renderizar al cambiar la opción en el select
+function filterCalendarioByTeam(teamName) {
+  selectedEquipo = teamName;
+  if (window.lastCalendarioData) {
+    renderCalendario(window.lastCalendarioData);
   }
+}
 
   let lastPosiciones = null, lastGoleadores = null;
 
@@ -1658,17 +2264,39 @@
     try {
       const [pos, gol, cal] = await Promise.all([fetchTable('Posiciones'), fetchTable('Goleadores'), fetchTable('Partidos')]);
       lastPosiciones = pos; lastGoleadores = gol;
-      lastPartidos = [...cal].sort((a, b) => a.id_partido.localeCompare(b.id_partido));
+
+      // MVP se administra desde Supabase. Si la tabla todavía no existe
+      // o no tiene filas, simplemente no se muestra la tarjeta.
+      try {
+        lastMvpRows = await fetchTable('MVP_Jornadas');
+      } catch (e) {
+        console.warn('MVP_Jornadas todavía no está disponible:', e);
+        lastMvpRows = [];
+      }
+      
+      // Aquí forzamos la propiedad 'jugado' leyendo directamente si hay goles reportados
+      lastPartidos = [...cal].map(m => ({
+        ...m,
+        jugado: (m.goles_local !== null && m.goles_local !== '')
+      })).sort((a, b) => {
+        const numA = a.orden != null ? a.orden : parseInt(String(a.id_partido).replace(/\D/g, ''), 10);
+        const numB = b.orden != null ? b.orden : parseInt(String(b.id_partido).replace(/\D/g, ''), 10);
+        return numA - numB;
+      });
+
       LIVE_LOGOS = Object.fromEntries(pos.filter(r => r.logo_url).map(r => [r.equipo, r.logo_url]));
       const posRanked = [...pos].sort((a, b) => (b.puntos - a.puntos) || (b.dg - a.dg) || (b.gf - a.gf));
       TEAM_RANK = Object.fromEntries(posRanked.map((r, i) => [r.equipo, i]));
       let playoffs = [];
-      try { playoffs = await fetchTable('Playoffs'); } catch (e) { /* tabla de playoffs todavía no existe */ }
+      try { playoffs = await fetchTable('Playoffs'); } catch (e) { }
+      
       renderPosiciones(pos);
       renderGoleadores(gol);
       renderLlaves(pos, playoffs);
-      renderCalendario(cal);
+      renderCalendario(lastPartidos);
       renderNextMatch();
+      renderMvpPorJornada();
+      
       syncDot.className = 'dot';
       syncText.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
     } catch (err) {
@@ -1691,6 +2319,7 @@
 
   const tabsByKey = { pos: tabPos, gol: tabGol, llaves: tabLlaves, cal: tabCal };
   const panelsByKey = { pos: panelPos, gol: panelGol, llaves: panelLlaves, cal: panelCal };
+  
   function selectTab(which) {
     Object.keys(tabsByKey).forEach(key => {
       const isSel = key === which;
@@ -1698,6 +2327,7 @@
       panelsByKey[key].hidden = !isSel;
     });
   }
+  
   tabPos.addEventListener('click', () => selectTab('pos'));
   tabGol.addEventListener('click', () => selectTab('gol'));
   tabLlaves.addEventListener('click', () => selectTab('llaves'));
