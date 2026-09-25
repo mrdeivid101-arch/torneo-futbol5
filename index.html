@@ -2324,7 +2324,7 @@ function filterCalendarioByTeam(teamName) {
       panelCal.innerHTML = stateHtml('Cargando…', '', false);
     }
     try {
-      const [pos, gol, cal] = await Promise.all([fetchTable('Posiciones'), fetchTable('Goleadores'), fetchTable('Partidos')]);
+      const [pos, gol, cal] = await Promise.all([fetchTable('posiciones_view'), fetchTable('goleadores_view'), fetchTable('Partidos')]);
       lastPosiciones = pos; lastGoleadores = gol;
 
       // MVP se administra desde Supabase. Si la tabla todavía no existe
