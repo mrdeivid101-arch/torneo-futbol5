@@ -694,6 +694,16 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
     white-space: nowrap;
   }
 
+  .cal-date-sub {
+    padding: 0.5rem 0.9rem 0.2rem;
+    font-size: 0.64rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--grass);
+    opacity: 0.9;
+  }
+
   .cal-match {
     padding: 0.6rem 0.9rem;
     border-bottom: 1px solid var(--line);
@@ -2259,44 +2269,62 @@ function renderCalendario(rows) {
     
     jornadas.forEach(j => {
       const jornadaMatches = matches.filter(r => r.jornada === j);
-      
-      let dayLabel = '';
-      const primerConFecha = jornadaMatches.find(m => m.fecha);
-      if (primerConFecha) {
-        const d = new Date(`${primerConFecha.fecha}T12:00:00-06:00`);
-        if (!Number.isNaN(d.getTime())) {
-           dayLabel = d.toLocaleDateString('es-HN', { weekday:'long', day:'numeric', month:'short' });
-           dayLabel = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
-        }
-      }
 
-      html += `<div class="cal-jornada"><span>Jornada ${j}</span><span class="cal-jornada-line"></span>${dayLabel ? `<span class="cal-jornada-day">${escapeHtml(dayLabel)}</span>` : ''}</div>`;
-      
+      html += `<div class="cal-jornada"><span>Jornada ${j}</span><span class="cal-jornada-line"></span></div>`;
+
+      // Agrupar por la fecha real de cada partido: dentro de una misma jornada
+      // puede haber partidos en días distintos (aplazamientos, reprogramados, etc.)
+      const dateGroups = [];
+      const seen = new Map();
       jornadaMatches.forEach(m => {
-        const score = m.jugado
-          ? `<span class="cal-score">${m.goles_local} - ${m.goles_visitante}</span>`
-          : `<span class="cal-score pending">vs</span>`;
-        
-        let horaHtml = '';
-        if (m.hora) {
-          const info = matchScheduleInfo(m);
-          if (info.displayHora !== 'Hora por confirmar') {
-            horaHtml = `<div class="cal-match-time">${escapeHtml(info.displayHora)}</div>`;
+        const key = m.fecha || '';
+        if (!seen.has(key)) {
+          seen.set(key, { fecha: m.fecha, items: [] });
+          dateGroups.push(seen.get(key));
+        }
+        seen.get(key).items.push(m);
+      });
+      dateGroups.sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
+
+      dateGroups.forEach(group => {
+        let dayLabel = '';
+        if (group.fecha) {
+          const d = new Date(`${group.fecha}T12:00:00-06:00`);
+          if (!Number.isNaN(d.getTime())) {
+            dayLabel = d.toLocaleDateString('es-HN', { weekday: 'long', day: 'numeric', month: 'short' });
+            dayLabel = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
           }
         }
+        if (dayLabel) {
+          html += `<div class="cal-date-sub">${escapeHtml(dayLabel)}</div>`;
+        }
 
-        const isLocalHighlight = sel !== 'todos' && m.equipo_local && m.equipo_local.trim() === sel ? 'highlight-team' : '';
-        const isVisitHighlight = sel !== 'todos' && m.equipo_visitante && m.equipo_visitante.trim() === sel ? 'highlight-team' : '';
+        group.items.forEach(m => {
+          const score = m.jugado
+            ? `<span class="cal-score">${m.goles_local} - ${m.goles_visitante}</span>`
+            : `<span class="cal-score pending">vs</span>`;
 
-        html += `
-          <div class="cal-match">
-            ${horaHtml}
-            <div class="cal-match-row">
-              <div class="cal-side ${isLocalHighlight}">${crestHtml(m.equipo_local)}<span class="cal-name">${escapeHtml(m.equipo_local)}</span></div>
-              ${score}
-              <div class="cal-side right ${isVisitHighlight}">${crestHtml(m.equipo_visitante)}<span class="cal-name">${escapeHtml(m.equipo_visitante)}</span></div>
-            </div>
-          </div>`;
+          let horaHtml = '';
+          if (m.hora) {
+            const info = matchScheduleInfo(m);
+            if (info.displayHora !== 'Hora por confirmar') {
+              horaHtml = `<div class="cal-match-time">${escapeHtml(info.displayHora)}</div>`;
+            }
+          }
+
+          const isLocalHighlight = sel !== 'todos' && m.equipo_local && m.equipo_local.trim() === sel ? 'highlight-team' : '';
+          const isVisitHighlight = sel !== 'todos' && m.equipo_visitante && m.equipo_visitante.trim() === sel ? 'highlight-team' : '';
+
+          html += `
+            <div class="cal-match">
+              ${horaHtml}
+              <div class="cal-match-row">
+                <div class="cal-side ${isLocalHighlight}">${crestHtml(m.equipo_local)}<span class="cal-name">${escapeHtml(m.equipo_local)}</span></div>
+                ${score}
+                <div class="cal-side right ${isVisitHighlight}">${crestHtml(m.equipo_visitante)}<span class="cal-name">${escapeHtml(m.equipo_visitante)}</span></div>
+              </div>
+            </div>`;
+        });
       });
     });
     
