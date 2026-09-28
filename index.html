@@ -474,6 +474,7 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
+    gap: 1.4rem;
     flex: 1 0 145px;
   }
 
@@ -516,6 +517,20 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
     border: 1px dashed var(--gold);
     background: rgba(217, 164, 65, 0.07);
     gap: 0.3rem;
+  }
+
+  .b-slot.b-bye {
+    background: rgba(217, 164, 65, 0.07);
+    border: 1px dashed rgba(205, 127, 50, 0.45);
+  }
+
+  .b-bye-tag {
+    padding-left: 1.95rem;
+    font-size: 0.58rem;
+    font-weight: 600;
+    color: var(--gold);
+    opacity: 0.9;
+    letter-spacing: 0.02em;
   }
 
   .b-slot.b-champion .trophy {
@@ -1451,12 +1466,13 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
   }
 
   function byeSlot(seed, team) {
-    return `<div class="b-slot${team ? '' : ' b-pending'}">
+    return `<div class="b-slot b-bye${team ? '' : ' b-pending'}">
       <div class="b-side">
         <span class="b-seed">${escapeHtml(seed)}</span>
         ${crestHtml(team)}
         <span class="b-team">${escapeHtml(team || 'Por definir')}</span>
       </div>
+      ${team ? '<div class="b-bye-tag">Clasificado directo · espera en semifinal</div>' : ''}
     </div>`;
   }
 
