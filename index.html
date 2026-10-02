@@ -519,6 +519,46 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
     gap: 0.3rem;
   }
 
+  .crest-wrap { position: relative; display: inline-flex; flex: none; }
+
+  .lead-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--pitch);
+    color: #fff;
+    font-size: 0.5rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--card);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .lead-badge { background: var(--grass); color: var(--pitch-dark); }
+  }
+  :root[data-theme="dark"] .lead-badge { background: var(--grass); color: var(--pitch-dark); }
+
+  .b-side.leading .b-team { font-weight: 700; color: var(--pitch); }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .b-side.leading .b-team { color: var(--grass); }
+  }
+  :root[data-theme="dark"] .b-side.leading .b-team { color: var(--grass); }
+
+  .b-vs-score.partial {
+    font-family: var(--font-body);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
   .b-slot.b-bye {
     background: rgba(217, 164, 65, 0.07);
     border: 1px dashed rgba(205, 127, 50, 0.45);
@@ -1465,6 +1505,12 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
     return `<span class="b-crest team-crest" role="button" tabindex="0" data-team="${safeTeam}" title="Ver perfil de ${safeTeam}" style="background:${teamHue(teamName)}">${initial}</span>`;
   }
 
+  function crestWithBadge(teamName, isLeading) {
+    const crest = crestHtml(teamName);
+    if (!isLeading || !teamName) return crest;
+    return `<span class="crest-wrap">${crest}<span class="lead-badge">✓</span></span>`;
+  }
+
   function byeSlot(seed, team) {
     return `<div class="b-slot b-bye${team ? '' : ' b-pending'}">
       <div class="b-side">
@@ -1490,17 +1536,19 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
 
   function versusSlot(seedA, teamA, seedB, teamB, extraClass, score, whenHtml) {
     const cls = 'b-slot' + (extraClass ? ' ' + extraClass : '');
-    const mid = score ? `<div class="b-vs-score">${score.a} - ${score.b}</div>` : `<div class="b-vs">vs</div>`;
+    const tied = score && score.a === score.b;
+    const mid = score ? `<div class="b-vs-score${tied ? ' tied' : ''}">${score.a} - ${score.b}${tied ? ' (empate)' : ''}</div>` : `<div class="b-vs">vs</div>`;
+    const leader = score && !tied ? (score.a > score.b ? teamA : teamB) : null;
     return `<div class="${cls}">
-      <div class="b-side${teamA ? '' : ' b-pending'}">
+      <div class="b-side${teamA ? '' : ' b-pending'}${leader === teamA ? ' leading' : ''}">
         <span class="b-seed">${escapeHtml(seedA)}</span>
-        ${crestHtml(teamA)}
+        ${crestWithBadge(teamA, leader === teamA)}
         <span class="b-team">${escapeHtml(teamA || 'Por definir')}</span>
       </div>
       ${mid}
-      <div class="b-side${teamB ? '' : ' b-pending'}">
+      <div class="b-side${teamB ? '' : ' b-pending'}${leader === teamB ? ' leading' : ''}">
         <span class="b-seed">${escapeHtml(seedB)}</span>
-        ${crestHtml(teamB)}
+        ${crestWithBadge(teamB, leader === teamB)}
         <span class="b-team">${escapeHtml(teamB || 'Por definir')}</span>
       </div>
       ${whenHtml || ''}
@@ -1518,8 +1566,18 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
       const tb = ida.goles_b + vuelta.goles_b;
       const tied = ta === tb;
       html += `<div class="b-vs-score${tied ? ' tied' : ''}">Global ${ta}-${tb}${tied ? ' (empate)' : ''}</div>`;
+    } else if (idaOk || vueltaOk) {
+      html += `<div class="b-vs-score partial">Parcial</div>`;
     }
     return html;
+  }
+
+  function tieLeader(ida, vuelta, teamA, teamB) {
+    let a = 0, b = 0, any = false;
+    if (legOk(ida)) { a += ida.goles_a; b += ida.goles_b; any = true; }
+    if (legOk(vuelta)) { a += vuelta.goles_a; b += vuelta.goles_b; any = true; }
+    if (!any || a === b) return null;
+    return a > b ? teamA : teamB;
   }
 
   function tieSlot(seedA, teamA, seedB, teamB, extraClass, ida, vuelta) {
@@ -1527,16 +1585,17 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
     let when = '';
     if (!legOk(ida)) when = whenLine(ida, 'Ida');
     else if (!legOk(vuelta)) when = whenLine(vuelta, 'Vuelta');
+    const leader = tieLeader(ida, vuelta, teamA, teamB);
     return `<div class="${cls}">
-      <div class="b-side${teamA ? '' : ' b-pending'}">
+      <div class="b-side${teamA ? '' : ' b-pending'}${leader === teamA ? ' leading' : ''}">
         <span class="b-seed">${escapeHtml(seedA)}</span>
-        ${crestHtml(teamA)}
+        ${crestWithBadge(teamA, leader === teamA)}
         <span class="b-team">${escapeHtml(teamA || 'Por definir')}</span>
       </div>
       ${tieMid(ida, vuelta)}
-      <div class="b-side${teamB ? '' : ' b-pending'}">
+      <div class="b-side${teamB ? '' : ' b-pending'}${leader === teamB ? ' leading' : ''}">
         <span class="b-seed">${escapeHtml(seedB)}</span>
-        ${crestHtml(teamB)}
+        ${crestWithBadge(teamB, leader === teamB)}
         <span class="b-team">${escapeHtml(teamB || 'Por definir')}</span>
       </div>
       ${when}
@@ -1570,8 +1629,19 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
 
     const rep45 = tieResult(po['REP_45_IDA'], po['REP_45_VUELTA'], t(3), t(4));
     const rep36 = tieResult(po['REP_36_IDA'], po['REP_36_VUELTA'], t(2), t(5));
-    const sf1 = tieResult(po['SF1_IDA'], po['SF1_VUELTA'], t(0), rep45.winner);
-    const sf2 = tieResult(po['SF2_IDA'], po['SF2_VUELTA'], t(1), rep36.winner);
+
+    // El 1° tiene el privilegio de enfrentar al clasificado del repechaje con MENOS puntos;
+    // el 2° se mide con el otro. "sorted" ya viene ordenada de mejor a peor posición.
+    let sf1Opponent = null, sf2Opponent = null, sf1Label = 'Clasif.', sf2Label = 'Clasif.';
+    if (rep45.winner && rep36.winner) {
+      const idx45 = sorted.findIndex(x => x.equipo === rep45.winner);
+      const idx36 = sorted.findIndex(x => x.equipo === rep36.winner);
+      if (idx45 > idx36) { sf1Opponent = rep45.winner; sf2Opponent = rep36.winner; sf1Label = 'G 4-5'; sf2Label = 'G 3-6'; }
+      else { sf1Opponent = rep36.winner; sf2Opponent = rep45.winner; sf1Label = 'G 3-6'; sf2Label = 'G 4-5'; }
+    }
+
+    const sf1 = tieResult(po['SF1_IDA'], po['SF1_VUELTA'], t(0), sf1Opponent);
+    const sf2 = tieResult(po['SF2_IDA'], po['SF2_VUELTA'], t(1), sf2Opponent);
     const finalRes = singleResult(po['FINAL'], sf1.winner, sf2.winner);
     const thirdRes = singleResult(po['TERCER'], sf1.loser, sf2.loser);
     const champion = finalRes.winner;
@@ -1591,8 +1661,7 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
     }).join('');
 
     const explainers = [
-      '1° y 2° ya esperan en semifinal. Del 3° al 6° juegan el repechaje a ida y vuelta: avanza quien tenga mejor marcador global.',
-      'Semifinales a ida y vuelta: los ganadores del repechaje se miden contra el 1° y 2° lugar por un puesto en la final.',
+      '1° y 2° ya esperan en semifinal. Del 3° al 6° juegan el repechaje a ida y vuelta',
       'La final es a partido único. Los perdedores de semifinal juegan por el tercer lugar.',
       champion ? `🏆 ${champion} es el campeón del torneo.` : 'El torneo ha terminado.'
     ];
@@ -1620,8 +1689,8 @@ details.cal-vuelta-details[open] summary.cal-vuelta::after {
 
           <div class="b-round round2 connect-out${roundLiveClass === 'round2' ? ' round-live' : ''}">
             <span class="b-round-label">Semifinales${roundLiveClass === 'round2' ? liveBadge : ''}</span>
-            ${tieSlot('1°', t(0), 'G 4-5', rep45.winner, 'connect-in', po['SF1_IDA'], po['SF1_VUELTA'])}
-            ${tieSlot('2°', t(1), 'G 3-6', rep36.winner, 'connect-in', po['SF2_IDA'], po['SF2_VUELTA'])}
+            ${tieSlot('1°', t(0), sf1Label, sf1Opponent, 'connect-in', po['SF1_IDA'], po['SF1_VUELTA'])}
+            ${tieSlot('2°', t(1), sf2Label, sf2Opponent, 'connect-in', po['SF2_IDA'], po['SF2_VUELTA'])}
           </div>
 
           <div class="b-round round3 connect-straight${roundLiveClass === 'round3' ? ' round-live' : ''}">
